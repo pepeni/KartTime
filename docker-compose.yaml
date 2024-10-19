@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  postgresql:
+    image: postgres
+    container_name: postgresql_karttime
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=DB
+
+volumes:
+  data: {}
+
+networks:
+  default:
+    name: db_network_karttime
