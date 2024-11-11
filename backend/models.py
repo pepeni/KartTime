@@ -11,3 +11,53 @@ class Test(db.Model):
 
     def __repr__(self):
         return f"<Test {self.name}>"
+    
+class Tor(db.Model):
+    __tablename__ = 'tor'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nazwa = db.Column(db.String(100), nullable=False)
+    informacje = db.Column(db.Text, nullable=True)
+    inne = db.Column(db.Text, nullable=True)
+
+    # Relacja do tabeli ToryGp
+    tory_gp = db.relationship('ToryGp', backref='tor', lazy=True)
+
+    def __init__(self, nazwa, informacje=None, inne=None):
+        self.nazwa = nazwa
+        self.informacje = informacje
+        self.inne = inne
+
+    def __repr__(self):
+        return f"<Tor {self.nazwa}>"
+
+class Gp(db.Model):
+    __tablename__ = 'gp'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nazwa = db.Column(db.String(100), nullable=False)
+    haslo = db.Column(db.String(100), nullable=False)
+
+    # Relacja do tabeli ToryGp
+    tory_gp = db.relationship('ToryGp', backref='gp', lazy=True)
+
+    def __init__(self, nazwa, haslo):
+        self.nazwa = nazwa
+        self.haslo = haslo
+
+    def __repr__(self):
+        return f"<Gp {self.nazwa}>"
+
+class ToryGp(db.Model):
+    __tablename__ = 'torygp'
+
+    id = db.Column(db.Integer, primary_key=True)
+    tor_id = db.Column(db.Integer, db.ForeignKey('tor.id'), nullable=False) 
+    gp_id = db.Column(db.Integer, db.ForeignKey('gp.id'), nullable=False)
+
+    def __init__(self, tor_id, gp_id):
+        self.tor_id = tor_id
+        self.gp_id = gp_id
+
+    def __repr__(self):
+        return f"<ToryGp tor_id={self.tor_id} gp_id={self.gp_id}>"
