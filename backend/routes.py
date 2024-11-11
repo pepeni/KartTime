@@ -1,35 +1,51 @@
 from flask import Blueprint, jsonify, request
+from flask_restx import Api, Resource, fields
 from models import Test
 from services import db
 
 api_blueprint = Blueprint('api', __name__)
 
-@api_blueprint.route('/get_data', methods=['GET'])
-def get_data():
-    return jsonify({"message": "Data fetched successfully"})
+# Initialize the API object here
+api = Api(api_blueprint)
 
-@api_blueprint.route('/post_data', methods=['POST'])
-def post_data():
-    data = request.json 
-    return jsonify({"message": "Data processed successfully", "data": data})
+# Define the input model for the POST request to /add_test
+test_model = api.model('Test', {
+    'name': fields.String(required=True, description='The name of the test')
+})
 
-@api_blueprint.route('/add_test', methods=['POST'])
-def add_test():
-    data = request.get_json()
+@api.route('/get_data')
+class GetData(Resource):
+    def get(self):
+        """Get data"""
+        return {"message": "Data fetched successfully"}
 
-    if not data or 'name' not in data:
-        return jsonify({"message": "Bad request, 'name' is required"}), 400
+@api.route('/post_data')
+class PostData(Resource):
+    def post(self):
+        """Post data"""
+        data = request.json
+        return {"message": "Data processed successfully", "data": data}
 
-    new_test = Test(name=data['name'])
+@api.route('/add_test')
+class AddTest(Resource):
+    @api.expect(test_model)
+    def post(self):
+        """Add a new test"""
+        data = request.get_json()
 
-    db.session.add(new_test)
-    db.session.commit()
+        if not data or 'name' not in data:
+            return {"message": "Bad request, 'name' is required"}, 400
 
-    return jsonify({"message": "Test object created successfully", "test": {"id": new_test.id, "name": new_test.name}}), 201
+        new_test = Test(name=data['name'])
+        db.session.add(new_test)
+        db.session.commit()
 
-@api_blueprint.route('/get_tests', methods=['GET'])
-def get_tests():
-    tests = Test.query.all() 
-    result = [{"id": test.id, "name": test.name} for test in tests]
+        return {"message": "Test object created successfully", "test": {"id": new_test.id, "name": new_test.name}}, 201
 
-    return jsonify({"tests": result}), 200
+@api.route('/get_tests')
+class GetTests(Resource):
+    def get(self):
+        """Get all tests"""
+        tests = Test.query.all()
+        result = [{"id": test.id, "name": test.name} for test in tests]
+        return {"tests": result}, 200
