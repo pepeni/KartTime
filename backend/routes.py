@@ -95,6 +95,25 @@ class Tories(Resource):
 
         return {"message": "Tor created successfully", "tor": {"id": new_tor.id, "nazwa": new_tor.nazwa}}, 201
 
+@api.route('/tory/<int:id>')
+class TorById(Resource):
+    @api.expect(tor_model)
+    def put(self, id):
+        """Update an existing tor"""
+        tor = Tor.query.get(id)
+        if tor is None:
+            return {"message": "Tor not found"}, 404
+        
+        data = request.get_json()
+        tor.nazwa = data.get('nazwa', tor.nazwa)
+        tor.informacje = data.get('informacje', tor.informacje)
+        tor.inne = data.get('inne', tor.inne)
+
+        db.session.commit()
+
+        return {"message": "Tor updated successfully", "tor": {"id": tor.id, "nazwa": tor.nazwa}}, 200
+
+
 # Endpoint dla wszystkich GP
 @api.route('/gp')
 class Gps(Resource):
@@ -117,6 +136,23 @@ class Gps(Resource):
 
         return {"message": "Gp created successfully", "gp": {"id": new_gp.id, "nazwa": new_gp.nazwa}}, 201
 
+@api.route('/gp/<int:id>')
+class GpById(Resource):
+    @api.expect(gp_model)
+    def put(self, id):
+        """Update an existing GP"""
+        gp = Gp.query.get(id)
+        if gp is None:
+            return {"message": "Gp not found"}, 404
+        
+        data = request.get_json()
+        gp.nazwa = data.get('nazwa', gp.nazwa)
+        gp.haslo = data.get('haslo', gp.haslo)
+
+        db.session.commit()
+
+        return {"message": "Gp updated successfully", "gp": {"id": gp.id, "nazwa": gp.nazwa}}, 200
+
 # Endpoint dla wszystkich relacji Tory-GP
 @api.route('/torygp')
 class ToryGps(Resource):
@@ -138,3 +174,20 @@ class ToryGps(Resource):
         db.session.commit()
 
         return {"message": "ToryGp created successfully", "torygp": {"id": new_torygp.id, "tor_id": new_torygp.tor_id, "gp_id": new_torygp.gp_id}}, 201
+    
+    @api.route('/torygp/<int:id>')
+    class ToryGpById(Resource):
+        @api.expect(torygp_model)
+        def put(self, id):
+            """Update an existing tory-gp relation"""
+            torygp = ToryGp.query.get(id)
+            if torygp is None:
+                return {"message": "ToryGp not found"}, 404
+            
+            data = request.get_json()
+            torygp.tor_id = data.get('tor_id', torygp.tor_id)
+            torygp.gp_id = data.get('gp_id', torygp.gp_id)
+
+            db.session.commit()
+
+            return {"message": "ToryGp updated successfully", "torygp": {"id": torygp.id, "tor_id": torygp.tor_id, "gp_id": torygp.gp_id}}, 200
