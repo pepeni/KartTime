@@ -1,9 +1,18 @@
 from flask import Flask
 from flask_cors import CORS
-from .routes import api_blueprint 
+from config import config
+from routes import api_blueprint
+from services import db, init_db
 
 app = Flask(__name__)
-CORS(app)  
+
+env = 'development'  # Change to 'production' as needed
+app.config.from_object(config[env])
+
+CORS(app)
+
+# Initialize the database with the app
+init_db(app)
 
 # Register the blueprint
 app.register_blueprint(api_blueprint)
