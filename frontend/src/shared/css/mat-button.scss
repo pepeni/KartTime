@@ -1,0 +1,13 @@
+@use '@angular/material' as mat;
+
+.mat-mdc-raised-button, 
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-button {
+    --mdc-protected-button-container-shape: 100px !important;
+    --mdc-text-button-container-shape: 100px !important;
+    --mdc-outlined-button-container-shape: 100px !important;
+    --mdc-filled-button-container-shape: 100px !important;
+}
+
+@include mat.button-density(0);
