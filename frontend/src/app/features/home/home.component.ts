@@ -2,10 +2,9 @@ import { Component } from '@angular/core';
 import { materialModules } from '../../core/config/material.config';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: materialModules,
-  template: `
+    selector: 'app-home',
+    imports: materialModules,
+    template: `
     <mat-toolbar color="primary">
       KartTime
     </mat-toolbar>
@@ -20,8 +19,8 @@ import { materialModules } from '../../core/config/material.config';
       </mat-card>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       mat-toolbar {
         font-size: 20px;
       }
@@ -33,7 +32,7 @@ import { materialModules } from '../../core/config/material.config';
         margin: 0 8px;
       }
     `,
-  ],
+    ]
 })
 export class HomeComponent {
 
