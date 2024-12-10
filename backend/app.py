@@ -4,6 +4,7 @@ from config import config
 from routes import api_blueprint
 from services import db, init_db
 from flask_restx import Api
+from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
 
@@ -17,6 +18,10 @@ CORS(app)
 
 # Initialize the database with the app
 init_db(app)
+
+# Initialize JWT for authentication
+app.config["JWT_SECRET_KEY"] = "your_jwt_secret_key"  # Change this to a secure key
+jwt = JWTManager(app)
 
 # Register the blueprint
 app.register_blueprint(api_blueprint, url_prefix='/api')

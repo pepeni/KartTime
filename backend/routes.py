@@ -1,16 +1,38 @@
 from flask import Blueprint, jsonify, request
 from flask_restx import Api, Resource, fields
-from models import Test, Tor, Gp, ToryGp
+from models import Test, Tor, Gp, ToryGp, User, Wynik
 from services import db
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from werkzeug.security import generate_password_hash
 
 api_blueprint = Blueprint('api', __name__)
 
+# Dodanie opisu schematu autoryzacji
+authorizations = {
+    'Bearer Auth': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization',
+        'description': 'Add "Bearer <JWT Token>"'
+    }
+}
+
 # Initialize the API object here
-api = Api(api_blueprint)
+api = Api(api_blueprint, authorizations=authorizations)
 
 # Define the input model for the POST request to /add_test
 test_model = api.model('Test', {
     'name': fields.String(required=True, description='The name of the test')
+})
+user_model = api.model('User', {
+    'username': fields.String(required=True, description='Username of the user'),
+    'password': fields.String(required=True, description='Password of the user'),
+    'email': fields.String(required=True, description='Email of the user')
+})
+
+login_model = api.model('Login', {
+    'username': fields.String(required=True, description='Username of the user'),
+    'password': fields.String(required=True, description='Password of the user')
 })
 
 @api.route('/get_data')
@@ -78,8 +100,12 @@ torygp_model = api.model('ToryGp', {
 class Tories(Resource):
     @api.marshal_list_with(tor_model)
     def get(self):
-        """Get all tor entries"""
-        tor_list = Tor.query.all()
+        """Pobierz wszystkie tory lub filtruj po nazwie"""
+        nazwa = request.args.get('nazwa', None)
+        if nazwa:
+            tor_list = Tor.query.filter(Tor.nazwa.ilike(f"%{nazwa}%")).all()
+        else:
+            tor_list = Tor.query.all()
         return tor_list, 200
 
     @api.expect(tor_model)
@@ -191,3 +217,138 @@ class ToryGps(Resource):
             db.session.commit()
 
             return {"message": "ToryGp updated successfully", "torygp": {"id": torygp.id, "tor_id": torygp.tor_id, "gp_id": torygp.gp_id}}, 200
+
+
+# User-related routes
+@api.route('/register')
+class Register(Resource):
+    @api.expect(user_model)
+    def post(self):
+        """Register a new user"""
+        data = request.get_json()
+
+        if User.query.filter_by(username=data['username']).first() or User.query.filter_by(email=data['email']).first():
+            return {"message": "Username or email already exists"}, 400
+
+        new_user = User(username=data['username'], password=data['password'], email=data['email'])
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {"message": "User registered successfully"}, 201
+
+
+@api.route('/login')
+class Login(Resource):
+    @api.expect(login_model)
+    def post(self):
+        """Log in a user"""
+        data = request.get_json()
+
+        if not data.get('username') or not data.get('password'):
+            return {"message": "Username and password are required"}, 400
+
+        user = User.query.filter_by(username=data['username']).first()
+
+        if user and user.verify_password(data['password']):
+            token = create_access_token(identity=str(user.id))
+            return {"message": "Login successful", "access_token": token}, 200
+
+        return {"message": "Invalid credentials"}, 401
+
+
+@api.route('/profile')
+class UserProfile(Resource):
+    @jwt_required()
+    @api.doc(security='Bearer Auth')
+    def get(self):
+        """Get user profile"""
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user:
+            return {"message": "User not found"}, 404
+
+        return {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }, 200
+
+    @jwt_required()
+    @api.expect(user_model)
+    def put(self):
+        """Update user profile"""
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user:
+            return {"message": "User not found"}, 404
+
+        data = request.get_json()
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+
+        if 'password' in data:
+            user.password_hash = generate_password_hash(data['password'])
+
+        db.session.commit()
+        return {"message": "Profile updated successfully"}, 200
+    
+wynik_model = api.model('Wynik', {
+    'id': fields.Integer(readonly=True, description='ID wyniku'),
+    'user_id': fields.Integer(required=True, description='ID użytkownika'),
+    'tor_id': fields.Integer(required=True, description='ID toru'),
+    'czas': fields.Float(required=True, description='Czas użytkownika na torze'),
+    'data': fields.String(required=True, description='Data wyniku (ISO format)')
+})
+
+@api.route('/wyniki')
+class Wyniki(Resource):
+    @api.marshal_list_with(wynik_model)
+    def get(self):
+        """Pobierz wszystkie wyniki"""
+        wyniki = Wynik.query.all()
+        return wyniki, 200
+
+    @api.expect(wynik_model)
+    @jwt_required()
+    @api.doc(security='Bearer Auth')
+    def post(self):
+        """Dodaj nowy wynik"""
+        data = request.get_json()
+        user_id = get_jwt_identity()
+
+        if 'tor_id' not in data or 'czas' not in data or 'data' not in data:
+            return {"message": "Bad request, required fields: 'tor_id', 'czas', 'data'"}, 400
+
+        wynik = Wynik(
+            user_id=user_id,
+            tor_id=data['tor_id'],
+            czas=data['czas'],
+            data=data['data']
+        )
+        db.session.add(wynik)
+        db.session.commit()
+
+        return {"message": "Wynik dodany pomyślnie", "wynik": {"id": wynik.id}}, 201
+
+@api.route('/wyniki/<int:id>')
+class WynikById(Resource):
+    def get(self, id):
+        """Pobierz wynik po ID"""
+        wynik = Wynik.query.get(id)
+        if wynik is None:
+            return {"message": "Wynik nie znaleziony"}, 404
+        return {"id": wynik.id, "user_id": wynik.user_id, "tor_id": wynik.tor_id, "czas": wynik.czas, "data": wynik.data}, 200
+
+    @jwt_required()
+    def delete(self, id):
+        """Usuń wynik"""
+        wynik = Wynik.query.get(id)
+        if wynik is None:
+            return {"message": "Wynik nie znaleziony"}, 404
+
+        db.session.delete(wynik)
+        db.session.commit()
+
+        return {"message": "Wynik usunięty pomyślnie"}, 200
