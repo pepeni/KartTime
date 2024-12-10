@@ -1,4 +1,5 @@
 from services import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Test(db.Model):
     __tablename__ = 'test'
@@ -61,3 +62,45 @@ class ToryGp(db.Model):
 
     def __repr__(self):
         return f"<ToryGp tor_id={self.tor_id} gp_id={self.gp_id}>"
+    
+class User(db.Model):
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+
+    def __init__(self, username, password, email):
+        self.username = username
+        self.password_hash = generate_password_hash(password)
+        self.email = email
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+    
+
+class Wynik(db.Model):
+    __tablename__ = 'wyniki'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tor_id = db.Column(db.Integer, db.ForeignKey('tor.id'), nullable=False)
+    czas = db.Column(db.Float, nullable=False)
+    data = db.Column(db.DateTime, nullable=False)
+
+    # Relacje
+    user = db.relationship('User', backref='wyniki', lazy=True)
+    tor = db.relationship('Tor', backref='wyniki', lazy=True)
+
+    def __init__(self, user_id, tor_id, czas, data):
+        self.user_id = user_id
+        self.tor_id = tor_id
+        self.czas = czas
+        self.data = data
+
+    def __repr__(self):
+        return f"<Wynik user_id={self.user_id} tor_id={self.tor_id} czas={self.czas}>"
