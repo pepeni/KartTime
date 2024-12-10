@@ -1,0 +1,32 @@
+:host {
+    width: 100svw;
+    height: 100svh;
+    display: flex;
+    background-image: linear-gradient(#fff, #F3F3F3, #E1E1E1);
+    justify-content: center;
+    align-items: center;
+}
+
+.main-panel {
+    height: 90%;
+    min-height: 400px;
+    width: fit-content;
+    min-width: 850px;
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+
+    .header {
+        height: 80px;
+        background-color: #77CDFF;
+        display: grid;
+        grid-template-columns: 1fr 1fr 100px;
+        justify-items: center;
+        align-items: center;
+
+        .label {
+            font-size: 12px;
+            line-height: 16px;
+        }
+    }
+}
