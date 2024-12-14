@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_restx import Api, Resource, fields
-from models import Test, Tor, Gp, ToryGp, User, Wynik
+from models import Test, Track, Gp, TrackGp, User, Wynik
 from services import db
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash
@@ -74,7 +74,7 @@ class GetTests(Resource):
     
 ########
 # Model dla Toru
-tor_model = api.model('Tor', {
+track_model = api.model('Track', {
     'id': fields.Integer(readonly=True, description='ID toru'),
     'nazwa': fields.String(required=True, description='Nazwa toru'),
     'informacje': fields.String(description='Informacje o torze'),
@@ -89,44 +89,44 @@ gp_model = api.model('Gp', {
 })
 
 # Model dla ToryGp
-torygp_model = api.model('ToryGp', {
+trackgp_model = api.model('TrackGp', {
     'id': fields.Integer(readonly=True, description='ID relacji tor-gp'),
     'tor_id': fields.Integer(required=True, description='ID toru'),
     'gp_id': fields.Integer(required=True, description='ID GP')
 })
 
 # Endpoint dla wszystkich torów
-@api.route('/tory')
-class Tories(Resource):
-    @api.marshal_list_with(tor_model)
+@api.route('/track')
+class Tracks(Resource):
+    @api.marshal_list_with(track_model)
     def get(self):
         """Pobierz wszystkie tory lub filtruj po nazwie"""
         nazwa = request.args.get('nazwa', None)
         if nazwa:
-            tor_list = Tor.query.filter(Tor.nazwa.ilike(f"%{nazwa}%")).all()
+            tor_list = Track.query.filter(Track.nazwa.ilike(f"%{nazwa}%")).all()
         else:
-            tor_list = Tor.query.all()
+            tor_list = Track.query.all()
         return tor_list, 200
 
-    @api.expect(tor_model)
+    @api.expect(track_model)
     def post(self):
         """Add a new tor"""
         data = request.get_json()
         if 'nazwa' not in data:
             return {"message": "Bad request, 'nazwa' is required"}, 400
 
-        new_tor = Tor(nazwa=data['nazwa'], informacje=data.get('informacje'), inne=data.get('inne'))
+        new_tor = Track(nazwa=data['nazwa'], informacje=data.get('informacje'), inne=data.get('inne'))
         db.session.add(new_tor)
         db.session.commit()
 
         return {"message": "Tor created successfully", "tor": {"id": new_tor.id, "nazwa": new_tor.nazwa}}, 201
 
-@api.route('/tory/<int:id>')
-class TorById(Resource):
-    @api.expect(tor_model)
+@api.route('/track/<int:id>')
+class TrackById(Resource):
+    @api.expect(track_model)
     def put(self, id):
         """Update an existing tor"""
-        tor = Tor.query.get(id)
+        tor = Track.query.get(id)
         if tor is None:
             return {"message": "Tor not found"}, 404
         
@@ -180,33 +180,33 @@ class GpById(Resource):
         return {"message": "Gp updated successfully", "gp": {"id": gp.id, "nazwa": gp.nazwa}}, 200
 
 # Endpoint dla wszystkich relacji Tory-GP
-@api.route('/torygp')
-class ToryGps(Resource):
-    @api.marshal_list_with(torygp_model)
+@api.route('/trackgp')
+class TrackGps(Resource):
+    @api.marshal_list_with(trackgp_model)
     def get(self):
         """Get all tory-gp entries"""
-        torygp_list = ToryGp.query.all()
+        torygp_list = TrackGp.query.all()
         return torygp_list, 200
 
-    @api.expect(torygp_model)
+    @api.expect(trackgp_model)
     def post(self):
         """Add a new tory-gp relation"""
         data = request.get_json()
         if 'tor_id' not in data or 'gp_id' not in data:
             return {"message": "Bad request, 'tor_id' and 'gp_id' are required"}, 400
 
-        new_torygp = ToryGp(tor_id=data['tor_id'], gp_id=data['gp_id'])
+        new_torygp = TrackGp(tor_id=data['tor_id'], gp_id=data['gp_id'])
         db.session.add(new_torygp)
         db.session.commit()
 
         return {"message": "ToryGp created successfully", "torygp": {"id": new_torygp.id, "tor_id": new_torygp.tor_id, "gp_id": new_torygp.gp_id}}, 201
     
-    @api.route('/torygp/<int:id>')
-    class ToryGpById(Resource):
-        @api.expect(torygp_model)
+    @api.route('/trackgp/<int:id>')
+    class TrackGpById(Resource):
+        @api.expect(trackgp_model)
         def put(self, id):
             """Update an existing tory-gp relation"""
-            torygp = ToryGp.query.get(id)
+            torygp = TrackGp.query.get(id)
             if torygp is None:
                 return {"message": "ToryGp not found"}, 404
             

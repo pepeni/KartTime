@@ -13,8 +13,8 @@ class Test(db.Model):
     def __repr__(self):
         return f"<Test {self.name}>"
     
-class Tor(db.Model):
-    __tablename__ = 'tor'
+class Track(db.Model):
+    __tablename__ = 'track'
 
     id = db.Column(db.Integer, primary_key=True)
     nazwa = db.Column(db.String(100), nullable=False)
@@ -22,7 +22,7 @@ class Tor(db.Model):
     inne = db.Column(db.Text, nullable=True)
 
     # Relacja do tabeli ToryGp
-    tory_gp = db.relationship('ToryGp', backref='tor', lazy=True)
+    tory_gp = db.relationship('TrackGp', backref='track', lazy=True)
 
     def __init__(self, nazwa, informacje=None, inne=None):
         self.nazwa = nazwa
@@ -30,7 +30,7 @@ class Tor(db.Model):
         self.inne = inne
 
     def __repr__(self):
-        return f"<Tor {self.nazwa}>"
+        return f"<Track {self.nazwa}>"
 
 class Gp(db.Model):
     __tablename__ = 'gp'
@@ -40,7 +40,7 @@ class Gp(db.Model):
     haslo = db.Column(db.String(100), nullable=False)
 
     # Relacja do tabeli ToryGp
-    tory_gp = db.relationship('ToryGp', backref='gp', lazy=True)
+    tory_gp = db.relationship('TrackGp', backref='gp', lazy=True)
 
     def __init__(self, nazwa, haslo):
         self.nazwa = nazwa
@@ -49,11 +49,11 @@ class Gp(db.Model):
     def __repr__(self):
         return f"<Gp {self.nazwa}>"
 
-class ToryGp(db.Model):
-    __tablename__ = 'torygp'
+class TrackGp(db.Model):
+    __tablename__ = 'trackgp'
 
     id = db.Column(db.Integer, primary_key=True)
-    tor_id = db.Column(db.Integer, db.ForeignKey('tor.id'), nullable=False) 
+    tor_id = db.Column(db.Integer, db.ForeignKey('track.id'), nullable=False) 
     gp_id = db.Column(db.Integer, db.ForeignKey('gp.id'), nullable=False)
 
     def __init__(self, tor_id, gp_id):
@@ -61,7 +61,7 @@ class ToryGp(db.Model):
         self.gp_id = gp_id
 
     def __repr__(self):
-        return f"<ToryGp tor_id={self.tor_id} gp_id={self.gp_id}>"
+        return f"<TrackGp track_id={self.tor_id} gp_id={self.gp_id}>"
     
 class User(db.Model):
     __tablename__ = 'user'
@@ -88,13 +88,13 @@ class Wynik(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    tor_id = db.Column(db.Integer, db.ForeignKey('tor.id'), nullable=False)
+    tor_id = db.Column(db.Integer, db.ForeignKey('track.id'), nullable=False)
     czas = db.Column(db.Float, nullable=False)
     data = db.Column(db.DateTime, nullable=False)
 
     # Relacje
     user = db.relationship('User', backref='wyniki', lazy=True)
-    tor = db.relationship('Tor', backref='wyniki', lazy=True)
+    tor = db.relationship('Track', backref='wyniki', lazy=True)
 
     def __init__(self, user_id, tor_id, czas, data):
         self.user_id = user_id
