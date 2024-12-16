@@ -1,20 +1,23 @@
-import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
-
+import { Component } from "@angular/core";
+import { MatButtonModule } from "@angular/material/button";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { Router } from "@angular/router";
 
 @Component({
-    selector: 'app-login',
-    imports: [MatButtonModule, MatFormFieldModule, MatInputModule],
-    templateUrl: './login.component.html',
-    styleUrl: './login.component.scss'
+	selector: "app-login",
+	imports: [MatButtonModule, MatFormFieldModule, MatInputModule],
+	templateUrl: "./login.component.html",
+	styleUrl: "./login.component.scss",
 })
 export class LoginComponent {
-  constructor(private router: Router) {}
-  
-  protected onSignUpClick() {
-    this.router.navigate(['/register']);
-    }
+	constructor(private router: Router) {}
+
+	protected onSignUpClick() {
+		this.router.navigate(["/register"]);
+	}
+
+	protected onLoginClick() {
+		this.router.navigate(["/"]);
+	}
 }

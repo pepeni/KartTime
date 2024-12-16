@@ -1,25 +1,38 @@
 <div class="main-panel">
     <div class="header">
-        <div class="icon-element">
-            <button mat-icon-button>
-                <mat-icon fontIcon="list"></mat-icon>
-            </button>
-            <div class="label">Courts list</div>
+        <div class="header-element">
+            <div class="icon-element">
+                <button mat-icon-button (click)="selectView('courts')">
+                    <mat-icon fontIcon="list"></mat-icon>
+                </button>
+                <div class="label">Courts list</div>
+            </div>
         </div>
-        <div class="icon-element">
-            <button mat-icon-button>
-               <mat-icon fontIcon="today"></mat-icon>
-            </button>
-            <div class="label">Tournaments</div>
+        <div class="header-element">
+            <div class="icon-element">
+                <button mat-icon-button>
+                    <mat-icon fontIcon="today" (click)="selectView('tournaments')"></mat-icon>
+                 </button>
+                 <div class="label">Tournaments</div>
+            </div>
         </div>  
-        <div class="icon-element">
-            <button mat-icon-button>
-                <mat-icon fontIcon="forward"></mat-icon>
-            </button>
-            <div class="label">Logout</div>
+        <div class="header-element">
+            <div class="icon-element">
+                <button mat-icon-button>
+                    <mat-icon fontIcon="forward"></mat-icon>
+                </button>
+                <div class="label">Logout</div>
+            </div>
         </div>
     </div>
     <div class="content">
-        <app-courts></app-courts>
+        @switch (selectedView) {
+            @case ("courts") {
+                <app-courts></app-courts>
+            }
+            @case ("tournaments") {
+                <app-tournaments></app-tournaments>
+            }
+        }
     </div>
 </div>
