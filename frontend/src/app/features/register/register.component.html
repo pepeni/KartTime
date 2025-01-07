@@ -3,23 +3,46 @@
         <div class="title">Kart Time</div>
     </div>
     <div class="content">
-        <form class="inputs">
-            <mat-form-field>
+        <form class="inputs" [formGroup]="registerForm">
+            <mat-form-field appearance="fill">
                 <mat-label>Username</mat-label>
-                <input matInput/>
+                <input matInput formControlName="username" />
+                @if (registerForm.get('username')?.hasError('required')) {
+                    <mat-error>
+                        Username is required.
+                    </mat-error>
+                } @else if (registerForm.get('username')?.hasError('minlength')) {
+                    <mat-error>
+                        Username must be at least 3 characters long.
+                    </mat-error>
+                }
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="fill">
                 <mat-label>Password</mat-label>
-                <input matInput type="password"/>
+                <input matInput type="password" formControlName="password" />
+                @if (registerForm.get('password')?.hasError('required')) {
+                    <mat-error>
+                        Password is required.
+                    </mat-error>
+                } @else if (registerForm.get('password')?.hasError('passwordStrength')) {
+                    <mat-error>
+                        The password must be at least 8 characters long, contain an uppercase and lowercase letter, a number and a special character.
+                    </mat-error>
+                }
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="fill">
                 <mat-label>Repeat Password</mat-label>
-                <input matInput type="password"/>
+                <input matInput type="password" formControlName="repeatPassword" />
+                @if (registerForm.get('repeatPassword')?.hasError('required')) {
+                    <mat-error>
+                        Repeating the password is required.
+                    </mat-error>
+                }
             </mat-form-field>
         </form>
         <div class="buttons">
             <button mat-stroked-button color="primary" (click)="onSignInClick()">SIGN IN</button>
-            <button mat-flat-button color="primary">REGISTER</button>
+            <button mat-flat-button color="primary" (click)="onRegisterClick()">REGISTER</button>
         </div>
     </div>
     <div class="footer"></div>
