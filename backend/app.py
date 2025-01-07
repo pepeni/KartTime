@@ -2,29 +2,25 @@ from flask import Flask
 from flask_cors import CORS
 from config import config
 from routes import api_blueprint
-from services import db, init_db
-from flask_restx import Api
-from flask_jwt_extended import JWTManager
+from services import init_db
+import logging
 
 app = Flask(__name__)
 
-env = 'development'  # Change to 'production' as needed
+env = 'development'
 app.config.from_object(config[env])
 
-# Initialize Flask-RESTX API
-api = Api(app, version='1.0', title='KartTime with Swagger', description='Automatically generated Swagger docs')
+app.register_blueprint(api_blueprint, url_prefix='/api')
 
 CORS(app)
 
-# Initialize the database with the app
 init_db(app)
 
-# Initialize JWT for authentication
-app.config["JWT_SECRET_KEY"] = "your_jwt_secret_key"  # Change this to a secure key
-jwt = JWTManager(app)
+logging.basicConfig(level=logging.DEBUG)
 
-# Register the blueprint
-app.register_blueprint(api_blueprint, url_prefix='/api')
+app.logger.setLevel(logging.INFO)
+app.debug = True
+
 
 if __name__ == '__main__':
     app.run(debug=True)

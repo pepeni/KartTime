@@ -1,354 +1,317 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from flask_restx import Api, Resource, fields
-from models import Test, Track, Gp, TrackGp, User, Wynik
-from services import db
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import random
+import string
+from datetime import timedelta, datetime, timezone
+from models import GP, Times, Track, User, UserGP
+from services import db, token_required
 
-api_blueprint = Blueprint('api', __name__)
-
-# Dodanie opisu schematu autoryzacji
 authorizations = {
-    'Bearer Auth': {
+    'JWT Auth': {
         'type': 'apiKey',
         'in': 'header',
         'name': 'Authorization',
-        'description': 'Add "Bearer <JWT Token>"'
+        'description': 'Bearer <JWT_Token>'
     }
 }
 
-# Initialize the API object here
-api = Api(api_blueprint, authorizations=authorizations)
+api_blueprint = Blueprint('api', __name__)
+api = Api(api_blueprint, title="KartTime API", version="1.0", description="API for KartTime application", authorizations=authorizations)
 
-# Define the input model for the POST request to /add_test
-test_model = api.model('Test', {
-    'name': fields.String(required=True, description='The name of the test')
-})
-user_model = api.model('User', {
-    'username': fields.String(required=True, description='Username of the user'),
-    'password': fields.String(required=True, description='Password of the user'),
-    'email': fields.String(required=True, description='Email of the user')
+user_registration_model = api.model('UserRegistration', {
+    'name': fields.String(required=True, description="User name"),
+    'password': fields.String(required=True, description="User password")
 })
 
-login_model = api.model('Login', {
-    'username': fields.String(required=True, description='Username of the user'),
-    'password': fields.String(required=True, description='Password of the user')
+user_login_model = api.model('UserLogin', {
+    'name': fields.String(required=True, description="User name"),
+    'password': fields.String(required=True, description="User password")
 })
 
-@api.route('/get_data')
-class GetData(Resource):
-    def get(self):
-        """Get data"""
-        return {"message": "Data fetched successfully"}
-
-@api.route('/post_data')
-class PostData(Resource):
-    def post(self):
-        """Post data"""
-        data = request.json
-        return {"message": "Data processed successfully", "data": data}
-
-@api.route('/add_test')
-class AddTest(Resource):
-    @api.expect(test_model)
-    def post(self):
-        """Add a new test"""
-        data = request.get_json()
-
-        if not data or 'name' not in data:
-            return {"message": "Bad request, 'name' is required"}, 400
-
-        new_test = Test(name=data['name'])
-        db.session.add(new_test)
-        db.session.commit()
-
-        return {"message": "Test object created successfully", "test": {"id": new_test.id, "name": new_test.name}}, 201
-
-@api.route('/get_tests')
-class GetTests(Resource):
-    def get(self):
-        """Get all tests"""
-        tests = Test.query.all()
-        result = [{"id": test.id, "name": test.name} for test in tests]
-        return {"tests": result}, 200
-    
-########
-# Model dla Toru
 track_model = api.model('Track', {
-    'id': fields.Integer(readonly=True, description='ID toru'),
-    'nazwa': fields.String(required=True, description='Nazwa toru'),
-    'informacje': fields.String(description='Informacje o torze'),
-    'inne': fields.String(description='Inne informacje o torze')
+    'id': fields.Integer(description='ID toru'),
+    'track_name': fields.String(description='Nazwa toru'),
+    'address': fields.String(description='Adres toru'),
+    'phone_number': fields.String(description='Numer telefonu'),
+    'opening_hours': fields.String(description='Godziny otwarcia'),
+    'url': fields.String(description='Strona toru')
 })
 
-# Model dla Gp
-gp_model = api.model('Gp', {
-    'id': fields.Integer(readonly=True, description='ID GP'),
-    'nazwa': fields.String(required=True, description='Nazwa GP'),
-    'haslo': fields.String(required=True, description='Hasło GP')
+lap_time_model = api.model('LapTime', {
+    'track_id': fields.Integer(required=True, description='ID toru'),
+    'lap_time': fields.String(required=True, description='Czas okrążenia w formacie MM:SS.sss')
 })
 
-# Model dla ToryGp
-trackgp_model = api.model('TrackGp', {
-    'id': fields.Integer(readonly=True, description='ID relacji tor-gp'),
-    'tor_id': fields.Integer(required=True, description='ID toru'),
-    'gp_id': fields.Integer(required=True, description='ID GP')
+create_gp_model = api.model('CreateGP', {
+    'name': fields.String(required=True, description='Nazwa GP'),
+    'track_id': fields.Integer(required=True, description='ID toru')
 })
 
-# Endpoint dla wszystkich torów
-@api.route('/track')
-class Tracks(Resource):
-    @api.marshal_list_with(track_model)
-    def get(self):
-        """Pobierz wszystkie tory lub filtruj po nazwie"""
-        nazwa = request.args.get('nazwa', None)
-        if nazwa:
-            tor_list = Track.query.filter(Track.nazwa.ilike(f"%{nazwa}%")).all()
-        else:
-            tor_list = Track.query.all()
-        return tor_list, 200
 
-    @api.expect(track_model)
-    def post(self):
-        """Add a new tor"""
-        data = request.get_json()
-        if 'nazwa' not in data:
-            return {"message": "Bad request, 'nazwa' is required"}, 400
+auth_ns = api.namespace('auth', description='Authentication operations')
+tracks_ns = api.namespace('tracks', description='Operations related to tracks')
+gp_ns = api.namespace('gp', description='Operations related to gp')
 
-        new_tor = Track(nazwa=data['nazwa'], informacje=data.get('informacje'), inne=data.get('inne'))
-        db.session.add(new_tor)
-        db.session.commit()
+SECRET_KEY = "default_secret_key"
+ALGORITHM = "HS256"
+TOKEN_EXPIRES_HOURS = 1
 
-        return {"message": "Tor created successfully", "tor": {"id": new_tor.id, "nazwa": new_tor.nazwa}}, 201
-
-@api.route('/track/<int:id>')
-class TrackById(Resource):
-    @api.expect(track_model)
-    def put(self, id):
-        """Update an existing tor"""
-        tor = Track.query.get(id)
-        if tor is None:
-            return {"message": "Tor not found"}, 404
-        
-        data = request.get_json()
-        tor.nazwa = data.get('nazwa', tor.nazwa)
-        tor.informacje = data.get('informacje', tor.informacje)
-        tor.inne = data.get('inne', tor.inne)
-
-        db.session.commit()
-
-        return {"message": "Tor updated successfully", "tor": {"id": tor.id, "nazwa": tor.nazwa}}, 200
-
-
-# Endpoint dla wszystkich GP
-@api.route('/gp')
-class Gps(Resource):
-    @api.marshal_list_with(gp_model)
-    def get(self):
-        """Get all gp entries"""
-        gp_list = Gp.query.all()
-        return gp_list, 200
-
-    @api.expect(gp_model)
-    def post(self):
-        """Add a new GP"""
-        data = request.get_json()
-        if 'nazwa' not in data or 'haslo' not in data:
-            return {"message": "Bad request, 'nazwa' and 'haslo' are required"}, 400
-
-        new_gp = Gp(nazwa=data['nazwa'], haslo=data['haslo'])
-        db.session.add(new_gp)
-        db.session.commit()
-
-        return {"message": "Gp created successfully", "gp": {"id": new_gp.id, "nazwa": new_gp.nazwa}}, 201
-
-@api.route('/gp/<int:id>')
-class GpById(Resource):
-    @api.expect(gp_model)
-    def put(self, id):
-        """Update an existing GP"""
-        gp = Gp.query.get(id)
-        if gp is None:
-            return {"message": "Gp not found"}, 404
-        
-        data = request.get_json()
-        gp.nazwa = data.get('nazwa', gp.nazwa)
-        gp.haslo = data.get('haslo', gp.haslo)
-
-        db.session.commit()
-
-        return {"message": "Gp updated successfully", "gp": {"id": gp.id, "nazwa": gp.nazwa}}, 200
-
-# Endpoint dla wszystkich relacji Tory-GP
-@api.route('/trackgp')
-class TrackGps(Resource):
-    @api.marshal_list_with(trackgp_model)
-    def get(self):
-        """Get all tory-gp entries"""
-        torygp_list = TrackGp.query.all()
-        return torygp_list, 200
-
-    @api.expect(trackgp_model)
-    def post(self):
-        """Add a new tory-gp relation"""
-        data = request.get_json()
-        if 'tor_id' not in data or 'gp_id' not in data:
-            return {"message": "Bad request, 'tor_id' and 'gp_id' are required"}, 400
-
-        new_torygp = TrackGp(tor_id=data['tor_id'], gp_id=data['gp_id'])
-        db.session.add(new_torygp)
-        db.session.commit()
-
-        return {"message": "ToryGp created successfully", "torygp": {"id": new_torygp.id, "tor_id": new_torygp.tor_id, "gp_id": new_torygp.gp_id}}, 201
-    
-    @api.route('/trackgp/<int:id>')
-    class TrackGpById(Resource):
-        @api.expect(trackgp_model)
-        def put(self, id):
-            """Update an existing tory-gp relation"""
-            torygp = TrackGp.query.get(id)
-            if torygp is None:
-                return {"message": "ToryGp not found"}, 404
-            
-            data = request.get_json()
-            torygp.tor_id = data.get('tor_id', torygp.tor_id)
-            torygp.gp_id = data.get('gp_id', torygp.gp_id)
-
-            db.session.commit()
-
-            return {"message": "ToryGp updated successfully", "torygp": {"id": torygp.id, "tor_id": torygp.tor_id, "gp_id": torygp.gp_id}}, 200
-
-
-# User-related routes
-@api.route('/register')
+@auth_ns.route('/register')
 class Register(Resource):
-    @api.expect(user_model)
+    @api.expect(user_registration_model)
     def post(self):
-        """Register a new user"""
         data = request.get_json()
+        name = data.get('name')
+        password = data.get('password')
 
-        if User.query.filter_by(username=data['username']).first() or User.query.filter_by(email=data['email']).first():
-            return {"message": "Username or email already exists"}, 400
+        if not name or not password:
+            return {"message": "Nazwa użytkownika i hasło są wymagane."}, 400
 
-        new_user = User(username=data['username'], password=data['password'], email=data['email'])
+        if User.query.filter_by(name=name).first():
+            return {"message": "Użytkownik o podanej nazwie już istnieje."}, 409
+
+        hashed_password = generate_password_hash(password)
+        new_user = User(name=name, pwd_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
-        return {"message": "User registered successfully"}, 201
+        return {"message": "Rejestracja zakończona sukcesem."}, 201
 
 
-@api.route('/login')
+@auth_ns.route('/login')
 class Login(Resource):
-    @api.expect(login_model)
+    @api.expect(user_login_model)
     def post(self):
-        """Log in a user"""
         data = request.get_json()
+        name = data.get('name')
+        password = data.get('password')
 
-        if not data.get('username') or not data.get('password'):
-            return {"message": "Username and password are required"}, 400
+        if not name or not password:
+            return {"message": "Nazwa użytkownika i hasło są wymagane."}, 400
 
-        user = User.query.filter_by(username=data['username']).first()
+        user = User.query.filter_by(name=name).first()
+        if not user or not check_password_hash(user.pwd_hash, password):
+            return {"message": "Nieprawidłowa nazwa użytkownika lub hasło."}, 401
+        
+        payload = {
+            "identity": user.id,
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat": datetime.now(timezone.utc)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-        if user and user.verify_password(data['password']):
-            token = create_access_token(identity=str(user.id))
-            return {"message": "Login successful", "access_token": token}, 200
+        return {"message": "Logged in successfully.", "access_token": token}, 200
+    
 
-        return {"message": "Invalid credentials"}, 401
-
-
-@api.route('/profile')
-class UserProfile(Resource):
-    @jwt_required()
-    @api.doc(security='Bearer Auth')
+@auth_ns.route('/whoami')
+class WhoAmI(Resource):
+    @api.doc(security='JWT Auth')
+    @token_required
     def get(self):
-        """Get user profile"""
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
+        user_id = request.user_id
+        user = User.query.filter_by(id=user_id).first()
+        if user:
+            return {'message': 'User found', 'name': user.name}
+        else:
+            return {'message': 'User not found'}, 404
+    
 
-        if not user:
-            return {"message": "User not found"}, 404
+@tracks_ns.route('/')
+class TracksList(Resource):
+    @api.doc(security='JWT Auth')
+    @api.marshal_list_with(track_model)
+    @token_required
+    def get(self):
+        tracks = Track.query.all()
+        return tracks
+
+
+@tracks_ns.route('/<int:track_id>')
+class TrackDetail(Resource):
+    @api.doc(security='JWT Auth')
+    
+    @api.marshal_with(track_model)
+    def get(self, track_id):
+        track = Track.query.get(track_id)
+        if not track:
+            api.abort(404, "Tor o podanym ID nie istnieje")
+        return track
+    
+
+@tracks_ns.route('/add_time')
+class AddLapTime(Resource):
+    @api.doc(security='JWT Auth') 
+    @api.expect(lap_time_model)
+    @token_required
+    def post(self):
+        data = request.get_json()
+        user_id = request.user_id
+
+        track_id = data.get('track_id')
+        lap_time = data.get('lap_time')
+
+        if not track_id or not lap_time:
+            return {"message": "ID toru i czas okrążenia są wymagane!"}, 400
+
+        track = Track.query.get(track_id)
+        if not track:
+            return {"message": "Podany tor nie istnieje!"}, 404
+
+        try:
+            minutes, seconds = map(float, lap_time.split(':'))
+            total_seconds = minutes * 60 + seconds
+            lap_time = (datetime.fromtimestamp(total_seconds, tz=timezone.utc)).time()
+        except ValueError:
+            return {"message": "Nieprawidłowy format czasu okrążenia. Użyj MM:SS.SSS."}, 400
+
+        lap_date = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        new_time = Times(
+            user_id=user_id,
+            track_id=track_id,
+            lap_time=lap_time,
+            lap_date=lap_date
+        )
+        db.session.add(new_time)
+        db.session.commit()
+
+        return {"message": "Czas dodany pomyślnie!"}, 201
+    
+
+@tracks_ns.route('/times')
+class UserLapTimes(Resource):
+    @api.doc(security='JWT Auth')
+    @token_required
+    def get(self):
+        user_id = request.user_id
+        times = Times.query.filter_by(user_id=user_id).all()
+
+        if not times:
+            return {"message": "Brak wyników dla tego użytkownika."}, 404
+
+        return [{
+            "track_id": time.track_id,
+            "lap_time": f"{time.lap_time.minute:02}:{time.lap_time.second:02}.{int(time.lap_time.microsecond / 1000):03}",
+            "lap_date": time.lap_date.strftime('%Y-%m-%d %H:%M:%S')
+        } for time in times], 200
+    
+
+@tracks_ns.route('/<int:track_id>/times')
+class TrackLapTimes(Resource):
+    @api.doc(security='JWT Auth')
+    @token_required
+    def get(self, track_id):
+        track = Track.query.get(track_id)
+        if not track:
+            return {"message": "Podany tor nie istnieje!"}, 404
+
+        times = db.session.query(Times, User).join(User).filter(Times.track_id == track_id).all()
+
+        if not times:
+            return {"message": "Brak czasów dla tego toru."}, 404
+
+        return [{
+            "id": time.Times.id,
+            "user_id": time.Times.user_id,
+            "user_name": time.User.name,
+            "lap_time": f"{time.Times.lap_time.minute:02}:{time.Times.lap_time.second:02}.{int(time.Times.lap_time.microsecond / 1000):03}",
+            "lap_date": time.Times.lap_date.strftime('%Y-%m-%d')
+        } for time in times], 200
+    
+
+@gp_ns.route('/create')
+class CreateGP(Resource):
+    @api.doc(security='JWT Auth')
+    @api.expect(create_gp_model)
+    @token_required
+    def post(self):
+        data = request.get_json()
+        user_id = request.user_id
+        name = data.get('name')
+        track_id = data.get('track_id')
+
+        if not name:
+            return {"message": "Nazwa GP jest wymagana!"}, 400
+        
+        track = Track.query.get(track_id)
+        if not track:
+            return {"message": "Podany tor nie istnieje!"}, 404
+
+        gp_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+        new_gp = GP(name=name, gp_code=gp_code, track_id=track_id)
+        db.session.add(new_gp)
+        db.session.commit()
+
+        user_gp = UserGP(user_id=user_id, gp_id=new_gp.id)
+        db.session.add(user_gp)
+        db.session.commit()
 
         return {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email
+            "message": "GP utworzone pomyślnie!",
+            "gp_id": new_gp.id,
+            "name": new_gp.name,
+            "gp_code": new_gp.gp_code,
+            "track_name": track.track_name
+        }, 201
+    
+
+@gp_ns.route('/join')
+class JoinGP(Resource):
+    @api.doc(security='JWT Auth')
+    @api.expect(api.model('JoinGP', {'gp_code': fields.String(required=True)}))
+    @token_required
+    def post(self):
+        data = request.get_json()
+        user_id = request.user_id
+        gp_code = data.get('gp_code')
+
+        if not gp_code:
+            return {"message": "Kod zapisu jest wymagany!"}, 400
+
+        gp = GP.query.filter_by(gp_code=gp_code).first()
+        if not gp:
+            return {"message": "Nieprawidłowy kod zapisu!"}, 404
+
+        existing_member = UserGP.query.filter_by(user_id=user_id, gp_id=gp.id).first()
+        if existing_member:
+            return {"message": "Jesteś już członkiem tego GP!"}, 400
+
+        user_gp = UserGP(user_id=user_id, gp_id=gp.id)
+        db.session.add(user_gp)
+        db.session.commit()
+
+        return {"message": f"Dołączono do GP '{gp.name}' pomyślnie!"}, 200
+    
+
+@gp_ns.route('/<int:gp_id>/participants')
+class GPParticipants(Resource):
+    @api.doc(security='JWT Auth')
+    @token_required
+    def get(self, gp_id):
+        gp = GP.query.get(gp_id)
+        if not gp:
+            return {"message": "GP nie istnieje!"}, 404
+
+        participants = db.session.query(User).join(UserGP).filter(UserGP.gp_id == gp_id).all()
+
+        if not participants:
+            return {"message": "Brak uczestników w tym GP."}, 404
+        
+        track = Track.query.get(gp.track_id)
+
+        return {
+            "name": gp.name, 
+            "gp_code": gp.gp_code,
+            "track_id": gp.track_id,
+            "track_name": track.track_name,
+            "participants": 
+                [{"id": user.id, "name": user.name} for user in participants]
         }, 200
 
-    @jwt_required()
-    @api.expect(user_model)
-    def put(self):
-        """Update user profile"""
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
 
-        if not user:
-            return {"message": "User not found"}, 404
-
-        data = request.get_json()
-        user.username = data.get('username', user.username)
-        user.email = data.get('email', user.email)
-
-        if 'password' in data:
-            user.password_hash = generate_password_hash(data['password'])
-
-        db.session.commit()
-        return {"message": "Profile updated successfully"}, 200
-    
-wynik_model = api.model('Wynik', {
-    'id': fields.Integer(readonly=True, description='ID wyniku'),
-    'user_id': fields.Integer(required=True, description='ID użytkownika'),
-    'tor_id': fields.Integer(required=True, description='ID toru'),
-    'czas': fields.Float(required=True, description='Czas użytkownika na torze'),
-    'data': fields.String(required=True, description='Data wyniku (ISO format)')
-})
-
-@api.route('/wyniki')
-class Wyniki(Resource):
-    @api.marshal_list_with(wynik_model)
-    def get(self):
-        """Pobierz wszystkie wyniki"""
-        wyniki = Wynik.query.all()
-        return wyniki, 200
-
-    @api.expect(wynik_model)
-    @jwt_required()
-    @api.doc(security='Bearer Auth')
-    def post(self):
-        """Dodaj nowy wynik"""
-        data = request.get_json()
-        user_id = get_jwt_identity()
-
-        if 'tor_id' not in data or 'czas' not in data or 'data' not in data:
-            return {"message": "Bad request, required fields: 'tor_id', 'czas', 'data'"}, 400
-
-        wynik = Wynik(
-            user_id=user_id,
-            tor_id=data['tor_id'],
-            czas=data['czas'],
-            data=data['data']
-        )
-        db.session.add(wynik)
-        db.session.commit()
-
-        return {"message": "Wynik dodany pomyślnie", "wynik": {"id": wynik.id}}, 201
-
-@api.route('/wyniki/<int:id>')
-class WynikById(Resource):
-    def get(self, id):
-        """Pobierz wynik po ID"""
-        wynik = Wynik.query.get(id)
-        if wynik is None:
-            return {"message": "Wynik nie znaleziony"}, 404
-        return {"id": wynik.id, "user_id": wynik.user_id, "tor_id": wynik.tor_id, "czas": wynik.czas, "data": wynik.data}, 200
-
-    @jwt_required()
-    def delete(self, id):
-        """Usuń wynik"""
-        wynik = Wynik.query.get(id)
-        if wynik is None:
-            return {"message": "Wynik nie znaleziony"}, 404
-
-        db.session.delete(wynik)
-        db.session.commit()
-
-        return {"message": "Wynik usunięty pomyślnie"}, 200
+api.add_namespace(auth_ns)
+api.add_namespace(tracks_ns)
+api.add_namespace(gp_ns)
