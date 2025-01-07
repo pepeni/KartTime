@@ -9,3 +9,8 @@ Odpalenie backa:
 - venv\Scripts\Activate
 - pip install -r requirements.txt
 - python reset_and_dump_db.py a później python app.py albo start_app.sh
+
+Podejrzenie tabelek w bazie z cmd:
+- docker exec -it postgresql_karttime bash
+- psql -U postgres -d DB
+- \dt
