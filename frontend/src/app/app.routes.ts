@@ -4,6 +4,7 @@ import { RegisterComponent } from './features/register/register.component';
 import { LayoutComponent } from './features/layout/layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { ReverseAuthGuard } from './core/guards/reverse-auth.guard';
+import { NotFoundComponent } from './features/not-found/not-found.component';
 
 export const routes: Routes = [
     {
@@ -21,4 +22,8 @@ export const routes: Routes = [
         component: RegisterComponent,
         canActivate: [ReverseAuthGuard]
     },
+    {
+        path: '**',
+        component: NotFoundComponent,
+    }
 ];
