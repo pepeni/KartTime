@@ -1,3 +1,4 @@
 karttime/
 backend/__init__.py
 backend/__pycache__
+backend/venv/
