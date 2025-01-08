@@ -16,12 +16,15 @@ with app.app_context():
     db.session.add(third_user)
 
     tracks = [
-        Track(track_name="WRT", address="Kornela Makuszyńskiego 30", phone_number="511407247", opening_hours="15:00-22:00", url="http://krakow.wrt-karting.pl/"),
-        Track(track_name="Karting Arena Kraków", address="Legnicka 5", phone_number="789035269", opening_hours="10:00-20:00", url="https://kartingarena.pl/"),
-        Track(track_name="Budda Center", address="Montelupich 7", phone_number="997112997", opening_hours="6:00-23:00", url="https://areszt-sledczy.pl/"),
-        Track(track_name="Silverstone", address="UK", phone_number="987654321", opening_hours="10:00-19:00", url="http://silverstone.com"),
-        Track(track_name="Spa-Francorchamps", address="Belgium", phone_number="456789123", opening_hours="08:00-17:00", url="http://spa.com")
-    ]
+    Track(track_name="Go Karting Center", address="Mariana Domagały 25, 30-798 Kraków", phone_number="126530256", opening_hours="14:00-22:00", url="https://gokarting.com.pl/"),
+    Track(track_name="Motodrom", address="ul. Bartników 10A, 30-798 Kraków", phone_number="501274608", opening_hours="15:00-21:00", url="https://gokarty.pl/"),
+    Track(track_name="WRT Karting Nowa Huta (Makuszyńskiego)", address="Kornela Makuszyńskiego 30, 31-752 Kraków", phone_number="511407247", opening_hours="15:00-22:00", url="http://krakow.wrt-karting.pl/"),
+    Track(track_name="WRT Karting Nowa Huta (Kapelanka)", address="Kapelanka 54, 30-347 Kraków", phone_number="572507316", opening_hours="15:00-22:00", url="http://krakow.wrt-karting.pl/"),
+    Track(track_name="Karting Arena Kraków", address="Legnicka 5, 31-216 Kraków", phone_number="789035269", opening_hours="15:00-22:00", url="https://kartingarena.pl/"),
+    Track(track_name="Racing Kart", address="Sulechów 108a k/Krakowa, 32-010 Kocmyrzów", phone_number="798304060", opening_hours="15:00-22:00", url="https://www.racingkart.pl/"),
+    Track(track_name="SKW Racing Park", address="ul. Fieldorfa Nila 7, 32-050 Skawina", phone_number="513827301", opening_hours="15:00-22:00", url="https://skw-racingpark.pl/")
+]
+
 
     db.session.add_all(tracks)
 
