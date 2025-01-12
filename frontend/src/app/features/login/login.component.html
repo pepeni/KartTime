@@ -15,7 +15,7 @@
             </mat-form-field>
             <mat-form-field>
                 <mat-label>Password</mat-label>
-                <input matInput type="password" formControlName="password" />
+                <input matInput type="password" formControlName="password" (keyup.enter)="onLoginClick()" />
                 @if (loginForm.get('password')?.hasError('required')) {
                     <mat-error>
                         Password is required.
