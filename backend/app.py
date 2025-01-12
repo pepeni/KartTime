@@ -6,13 +6,12 @@ from services import init_db
 import logging
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True, withCredentials=True)
 
 env = 'development'
 app.config.from_object(config[env])
 
 app.register_blueprint(api_blueprint, url_prefix='/api')
-
-CORS(app)
 
 init_db(app)
 

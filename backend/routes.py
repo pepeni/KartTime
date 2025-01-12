@@ -117,12 +117,11 @@ class WhoAmI(Resource):
         else:
             return {'message': 'User not found'}, 404
     
-
 @tracks_ns.route('/')
 class TracksList(Resource):
     @api.doc(security='JWT Auth')
     @api.marshal_list_with(track_model)
-    @token_required
+    # @token_required
     def get(self):
         tracks = Track.query.all()
         return tracks
@@ -138,13 +137,13 @@ class TrackDetail(Resource):
         if not track:
             api.abort(404, "Tor o podanym ID nie istnieje")
         return track
-    
+
 
 @tracks_ns.route('/add_time')
 class AddLapTime(Resource):
     @api.doc(security='JWT Auth') 
     @api.expect(lap_time_model)
-    @token_required
+    # @token_required
     def post(self):
         data = request.get_json()
         user_id = request.user_id
@@ -183,7 +182,7 @@ class AddLapTime(Resource):
 @tracks_ns.route('/times')
 class UserLapTimes(Resource):
     @api.doc(security='JWT Auth')
-    @token_required
+    # @token_required
     def get(self):
         user_id = request.user_id
         times = Times.query.filter_by(user_id=user_id).all()
@@ -201,7 +200,7 @@ class UserLapTimes(Resource):
 @tracks_ns.route('/<int:track_id>/times')
 class TrackLapTimes(Resource):
     @api.doc(security='JWT Auth')
-    @token_required
+    # @token_required
     def get(self, track_id):
         track = Track.query.get(track_id)
         if not track:
@@ -225,7 +224,7 @@ class TrackLapTimes(Resource):
 class CreateGP(Resource):
     @api.doc(security='JWT Auth')
     @api.expect(create_gp_model)
-    @token_required
+    # @token_required
     def post(self):
         data = request.get_json()
         user_id = request.user_id
@@ -262,7 +261,7 @@ class CreateGP(Resource):
 class JoinGP(Resource):
     @api.doc(security='JWT Auth')
     @api.expect(api.model('JoinGP', {'gp_code': fields.String(required=True)}))
-    @token_required
+    # @token_required
     def post(self):
         data = request.get_json()
         user_id = request.user_id
@@ -289,7 +288,7 @@ class JoinGP(Resource):
 @gp_ns.route('/<int:gp_id>/participants')
 class GPParticipants(Resource):
     @api.doc(security='JWT Auth')
-    @token_required
+    # @token_required
     def get(self, gp_id):
         gp = GP.query.get(gp_id)
         if not gp:
