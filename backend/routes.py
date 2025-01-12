@@ -5,7 +5,7 @@ import jwt
 import random
 import string
 from datetime import timedelta, datetime, timezone
-from models import GP, Times, Track, User, UserGP
+from models import GP, GPTimes, Times, Track, User, UserGP
 from services import db, token_required
 
 authorizations = {
@@ -40,13 +40,27 @@ track_model = api.model('Track', {
 })
 
 lap_time_model = api.model('LapTime', {
+    'user_id': fields.Integer(description='ID usera'),
     'track_id': fields.Integer(required=True, description='ID toru'),
     'lap_time': fields.String(required=True, description='Czas okrążenia w formacie MM:SS.sss')
 })
 
 create_gp_model = api.model('CreateGP', {
+    'user_id': fields.Integer(description='ID usera'),
     'name': fields.String(required=True, description='Nazwa GP'),
     'track_id': fields.Integer(required=True, description='ID toru')
+})
+
+join_gp_model = api.model('JoinGP', {
+    'user_id': fields.Integer(description='ID usera'),
+    'gp_code': fields.String(required=True)
+})
+
+gp_time_model = api.model('GPTime', {
+    'user_id': fields.Integer(description='ID usera'),
+    'gp_id': fields.Integer(required=True, description='ID Grand Prix'),
+    'lap_time': fields.String(required=True, description='Czas okrążenia w formacie MM:SS.sss'),
+    'standing': fields.Integer(required=True, description='Pozycja w wyścigu (miejsce na podium)')
 })
 
 
@@ -102,15 +116,14 @@ class Login(Resource):
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-        return {"message": "Logged in successfully.", "access_token": token}, 200
+        return {"message": "Logged in successfully.", "access_token": token, "user_id": user.id}, 200
     
 
-@auth_ns.route('/whoami')
+@auth_ns.route('/whoami/<int:user_id>')
 class WhoAmI(Resource):
-    @api.doc(security='JWT Auth')
-    @token_required
-    def get(self):
-        user_id = request.user_id
+    # @api.doc(security='JWT Auth')
+    # @token_required
+    def get(self, user_id):
         user = User.query.filter_by(id=user_id).first()
         if user:
             return {'message': 'User found', 'name': user.name}
@@ -119,7 +132,7 @@ class WhoAmI(Resource):
     
 @tracks_ns.route('/')
 class TracksList(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     @api.marshal_list_with(track_model)
     # @token_required
     def get(self):
@@ -129,7 +142,7 @@ class TracksList(Resource):
 
 @tracks_ns.route('/<int:track_id>')
 class TrackDetail(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     
     @api.marshal_with(track_model)
     def get(self, track_id):
@@ -141,13 +154,12 @@ class TrackDetail(Resource):
 
 @tracks_ns.route('/add_time')
 class AddLapTime(Resource):
-    @api.doc(security='JWT Auth') 
+    # @api.doc(security='JWT Auth') 
     @api.expect(lap_time_model)
     # @token_required
     def post(self):
         data = request.get_json()
-        user_id = request.user_id
-
+        user_id = data.get('user_id')
         track_id = data.get('track_id')
         lap_time = data.get('lap_time')
 
@@ -179,12 +191,11 @@ class AddLapTime(Resource):
         return {"message": "Czas dodany pomyślnie!"}, 201
     
 
-@tracks_ns.route('/times')
+@tracks_ns.route('/times/<int:user_id>')
 class UserLapTimes(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     # @token_required
-    def get(self):
-        user_id = request.user_id
+    def get(self, user_id):
         times = Times.query.filter_by(user_id=user_id).all()
 
         if not times:
@@ -199,7 +210,7 @@ class UserLapTimes(Resource):
 
 @tracks_ns.route('/<int:track_id>/times')
 class TrackLapTimes(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     # @token_required
     def get(self, track_id):
         track = Track.query.get(track_id)
@@ -222,12 +233,12 @@ class TrackLapTimes(Resource):
 
 @gp_ns.route('/create')
 class CreateGP(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     @api.expect(create_gp_model)
     # @token_required
     def post(self):
         data = request.get_json()
-        user_id = request.user_id
+        user_id = data.get('user_id')
         name = data.get('name')
         track_id = data.get('track_id')
 
@@ -259,12 +270,12 @@ class CreateGP(Resource):
 
 @gp_ns.route('/join')
 class JoinGP(Resource):
-    @api.doc(security='JWT Auth')
-    @api.expect(api.model('JoinGP', {'gp_code': fields.String(required=True)}))
+    # @api.doc(security='JWT Auth')
+    @api.expect(join_gp_model)
     # @token_required
     def post(self):
         data = request.get_json()
-        user_id = request.user_id
+        user_id = data.get('user_id')
         gp_code = data.get('gp_code')
 
         if not gp_code:
@@ -287,7 +298,7 @@ class JoinGP(Resource):
 
 @gp_ns.route('/<int:gp_id>/participants')
 class GPParticipants(Resource):
-    @api.doc(security='JWT Auth')
+    # @api.doc(security='JWT Auth')
     # @token_required
     def get(self, gp_id):
         gp = GP.query.get(gp_id)
@@ -309,6 +320,69 @@ class GPParticipants(Resource):
             "participants": 
                 [{"id": user.id, "name": user.name} for user in participants]
         }, 200
+    
+@gp_ns.route('/add_time')
+class AddGPTime(Resource):
+    # @api.doc(security='JWT Auth')
+    @api.expect(gp_time_model)
+    # @token_required
+    def post(self):
+        data = request.get_json()
+        user_id = data.get('user_id')
+        gp_id = data.get('gp_id')
+        lap_time = data.get('lap_time')
+        standing = data.get('standing')
+
+        if not gp_id or not lap_time or standing is None:
+            return {"message": "ID GP, czas okrążenia i pozycja są wymagane!"}, 400
+
+        gp = GP.query.get(gp_id)
+        if not gp:
+            return {"message": "Podane GP nie istnieje!"}, 404
+
+        try:
+            minutes, seconds = map(float, lap_time.split(':'))
+            total_seconds = minutes * 60 + seconds
+            lap_time = (datetime.fromtimestamp(total_seconds, tz=timezone.utc)).time()
+        except ValueError:
+            return {"message": "Nieprawidłowy format czasu okrążenia. Użyj MM:SS.SSS."}, 400
+
+        lap_date = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        new_gp_time = GPTimes(
+            user_id=user_id,
+            gp_id=gp_id,
+            standing=standing,
+            lap_time=lap_time,
+            lap_date=lap_date
+        )
+        db.session.add(new_gp_time)
+        db.session.commit()
+
+        return {"message": "Czas dodany do GP pomyślnie!"}, 201
+    
+@gp_ns.route('/<int:gp_id>/times')
+class GPTimesList(Resource):
+    # @api.doc(security='JWT Auth')
+    # @token_required
+    def get(self, gp_id):
+        gp = GP.query.get(gp_id)
+        if not gp:
+            return {"message": "GP nie istnieje!"}, 404
+
+        times = db.session.query(GPTimes, User).join(User).filter(GPTimes.gp_id == gp_id).all()
+
+        if not times:
+            return {"message": "Brak czasów dla tego GP."}, 404
+
+        return [{
+            "user_id": time.GPTimes.user_id,
+            "user_name": time.User.name,
+            "standing": time.GPTimes.standing,
+            "lap_time": f"{time.GPTimes.lap_time.minute:02}:{time.GPTimes.lap_time.second:02}.{int(time.GPTimes.lap_time.microsecond / 1000):03}",
+            "lap_date": time.GPTimes.lap_date.strftime('%Y-%m-%d')
+        } for time in times], 200
+
 
 
 api.add_namespace(auth_ns)
