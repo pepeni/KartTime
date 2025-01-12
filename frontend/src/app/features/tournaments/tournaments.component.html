@@ -1,8 +1,8 @@
 <div class="title">Tournaments</div>
 
 <div class="actions">
-	<button mat-raised-button color="primary">Join Tournament</button>
-	<button mat-raised-button color="primary">
+	<button mat-raised-button color="primary" (click)="openJoinGPDialog()">Join Tournament</button>
+	<button mat-raised-button color="primary" (click)="openNewGPDialog()">
 		<mat-icon fontIcon="add"></mat-icon>
         Create Tournament
 	</button>

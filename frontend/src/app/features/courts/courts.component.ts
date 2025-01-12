@@ -7,7 +7,6 @@ import { ApiService } from '../../core/services/api.service';
 import { TruckListElement } from '../../core/models/kart-time-defs';
 import { API_TRUCKS_URL } from '../../core/models/const';
 import { FormsModule } from '@angular/forms';
-import { ModalService } from '../../core/services/modal.service';
 
 @Component({
     selector: 'app-courts',
@@ -26,8 +25,7 @@ export class CourtsComponent implements OnInit {
 
     constructor(
         private readonly apiService: ApiService, 
-        private readonly cdr: ChangeDetectorRef, 
-        private readonly modalService: ModalService
+        private readonly cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -49,10 +47,5 @@ export class CourtsComponent implements OnInit {
     public reset(): void {
         this.searchValue = "";
         this.search()
-    }
-
-    public openModal(): void {
-        this.modalService.openNewGPDialog()
-        // this.modalService.openJoinGPDialog()
     }
 }

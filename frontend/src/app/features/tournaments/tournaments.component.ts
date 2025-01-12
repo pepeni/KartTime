@@ -1,6 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+import { ModalService } from "../../core/services/modal.service";
 
 @Component({
 	selector: "app-tournaments",
@@ -9,39 +10,13 @@ import { MatIconModule } from "@angular/material/icon";
 	styleUrl: "./tournaments.component.scss",
 })
 export class TournamentsComponent {
-	openedTournaments = [
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-	];
+	private readonly modalService = inject(ModalService);
 
-	myTournaments = [
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-		{
-			name: "Kraków Bronowice",
-			date: "10.11.2023 - 11.11.2024",
-			owner: "user1",
-		},
-	];
+	protected openNewGPDialog() {
+        this.modalService.openNewGPDialog();
+    }
+
+	protected openJoinGPDialog() {
+		this.modalService.openJoinGPDialog();
+	}
 }
