@@ -3,11 +3,68 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 32px;
 }
 
 .title {
     font-size: 40px;
     line-height: 48px;
     margin-top: 32px;
+}
+.search-bar {
+    margin-top: 32px;
+    position: relative;
+
+    mat-icon {
+        color: gray;
+    }
+
+    &--clear {
+        position: absolute;
+        right: -72px;
+        top: 12px;
+    }
+}
+.filtered-elements {
+    height: calc(100% - 190px);
+    width: 80%;
+    min-width: 200px;
+}
+.list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    height: 100%;
+    overflow: auto;
+
+    &:has(.element-container:hover) {
+        .element-container:not(:hover)  {
+            background-color: #CCECFF;
+        }
+    }
+
+    .element-container {
+        background-color: #99D9FF;
+        display: grid;
+        grid-template-areas: "name time" "address address";
+        grid-template-columns: 1fr auto;
+        grid-template-rows: 1fr auto;
+        padding: 16px;
+        width: 90%;
+        gap: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+
+        transition: 200ms all;
+    }
+    .element-name {
+        grid-area: name;
+        font-size: 32px;
+    }
+    .element-address {
+        grid-area: address;
+    }
+    .element-time {
+        grid-area: time;
+    }
 }

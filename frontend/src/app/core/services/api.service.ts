@@ -1,28 +1,44 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { AuthService } from "./auth.service";
 
 @Injectable({
-	providedIn: 'root'
+    providedIn: "root",
 })
 export class ApiService {
-	private readonly http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
+    private readonly authService = inject(AuthService);
 
-	private readonly BASE_URL = 'http://127.0.0.1:5000/api/';
+    private readonly BASE_URL = "http://127.0.0.1:5000/api/";
 
-	get<T>(endpoint: string, params?: any): Observable<T> {
-		return this.http.get<T>(`${this.BASE_URL}/${endpoint}`, { params });
-	}
+    private getAuthHeaders(): HttpHeaders {
+        const token = this.authService.getToken();
+        if (token) {
+            return new HttpHeaders({
+                Authorization: `Bearer "${token}"`,
+            });
+        }
+        return new HttpHeaders();
+    }
 
-	post<T>(endpoint: string, body: any, headers?: HttpHeaders): Observable<T> {
-		return this.http.post<T>(`${this.BASE_URL}/${endpoint}`, body, { headers });
-	}
+    get<T>(endpoint: string, params?: any): Observable<T> {
+        // const headers = this.getAuthHeaders();
+        return this.http.get<T>(`${this.BASE_URL}${endpoint}`, { params });
+    }
 
-	put<T>(endpoint: string, body: any): Observable<T> {
-		return this.http.put<T>(`${this.BASE_URL}/${endpoint}`, body);
-	}
+    post<T>(endpoint: string, body: any): Observable<T> {
+        const headers = this.getAuthHeaders();
+        return this.http.post<T>(`${this.BASE_URL}${endpoint}`, body, { headers });
+    }
 
-	delete<T>(endpoint: string): Observable<T> {
-		return this.http.delete<T>(`${this.BASE_URL}/${endpoint}`);
-	}
+    put<T>(endpoint: string, body: any): Observable<T> {
+        const headers = this.getAuthHeaders();
+        return this.http.put<T>(`${this.BASE_URL}${endpoint}`, body, { headers });
+    }
+
+    delete<T>(endpoint: string): Observable<T> {
+        const headers = this.getAuthHeaders();
+        return this.http.delete<T>(`${this.BASE_URL}${endpoint}`, { headers });
+    }
 }

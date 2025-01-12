@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { CourtsComponent } from "../courts/courts.component";
@@ -10,6 +10,7 @@ import { Router } from "@angular/router";
 @Component({
 	selector: "layout-register",
 	standalone: true,
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [MatIconModule, MatButtonModule, CourtsComponent, TournamentsComponent],
 	templateUrl: "./layout.component.html",
 	styleUrl: "./layout.component.scss",
