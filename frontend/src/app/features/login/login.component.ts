@@ -13,6 +13,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { Router } from "@angular/router";
 import { AuthService } from "../../core/services/auth.service";
+import { ApiService } from "../../core/services/api.service";
+import { UserData } from "../../core/models/user-data";
 
 @Component({
 	selector: "app-login",
@@ -35,7 +37,8 @@ export class LoginComponent {
 		private router: Router,
 		private fb: FormBuilder,
 		private http: HttpClient,
-		private authService: AuthService
+		private authService: AuthService,
+		private readonly apiService: ApiService
 	) {
 		this.loginForm = this.fb.group({
 			username: ["", [Validators.required]],
@@ -53,22 +56,20 @@ export class LoginComponent {
 			return;
 		}
 
-		const loginData = {
+		const loginData: UserData = {
 			name: this.loginForm.value.username,
 			password: this.loginForm.value.password,
 		};
 
-		this.http
-			.post("http://127.0.0.1:5000/api/auth/login", loginData)
-			.subscribe({
-				next: (res: any) => {
-					this.authService.setToken(res.access_token);
-					this.router.navigate(["/"]);
-				},
-				error: (err) => {
-					console.error(err);
-					alert("Login error: " + err.error.message);
-				},
-			});
+		this.apiService.login(loginData).subscribe({
+			next: (res: any) => {
+				this.authService.setToken(res.access_token);
+				this.router.navigate(["/"]);
+			},
+			error: (err) => {
+				console.error(err);
+				alert("Login error: " + err.error.message);
+			},
+		});
 	}
 }

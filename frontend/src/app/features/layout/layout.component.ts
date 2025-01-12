@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { CourtsComponent } from "../courts/courts.component";
@@ -8,7 +8,7 @@ import { Router } from "@angular/router";
 
 
 @Component({
-	selector: "layout-register",
+	selector: "app-layout",
 	standalone: true,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [MatIconModule, MatButtonModule, CourtsComponent, TournamentsComponent],
@@ -18,10 +18,12 @@ import { Router } from "@angular/router";
 export class LayoutComponent {
 	selectedView: 'courts' | 'tournaments' = 'courts';
 
-	constructor(private authService: AuthService, private router: Router) {}
+	constructor(private authService: AuthService, private router: Router,  private cdr: ChangeDetectorRef) {}
 
 	protected selectView(view: 'courts' | 'tournaments') {
 		this.selectedView = view;
+		this.cdr.detectChanges();
+		console.log(this.selectedView)
 	}
 
 	protected logout() {

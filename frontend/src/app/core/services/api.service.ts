@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { AuthService } from "./auth.service";
+import { API_LOGIN_URL, API_REGISTER_URL } from "../models/const";
+import { UserData } from "../models/user-data";
 
 @Injectable({
     providedIn: "root",
@@ -16,7 +18,7 @@ export class ApiService {
         const token = this.authService.getToken();
         if (token) {
             return new HttpHeaders({
-                Authorization: `Bearer "${token}"`,
+                Authorization: `Bearer ${token}`,
             });
         }
         return new HttpHeaders();
@@ -40,5 +42,13 @@ export class ApiService {
     delete<T>(endpoint: string): Observable<T> {
         const headers = this.getAuthHeaders();
         return this.http.delete<T>(`${this.BASE_URL}${endpoint}`, { headers });
+    }
+
+    login(body: UserData): Observable<any> {
+        return this.http.post(`${this.BASE_URL}${API_LOGIN_URL}`, body);
+    }
+
+    register(body: UserData): Observable<any> {
+        return this.http.post(`${this.BASE_URL}${API_REGISTER_URL}`, body);
     }
 }

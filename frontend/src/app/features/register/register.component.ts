@@ -6,6 +6,8 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { Router } from "@angular/router";
+import { ApiService } from "../../core/services/api.service";
+import { UserData } from "../../core/models/user-data";
 
 
 const passwordValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -33,7 +35,8 @@ export class RegisterComponent {
 	constructor(
 		private router: Router,
 		private fb: FormBuilder,
-		private http: HttpClient
+		private http: HttpClient,
+		private readonly apiService: ApiService
 	) {
 		this.registerForm = this.fb.group({
 			username: ["", [Validators.required, Validators.minLength(3)]],
@@ -57,22 +60,20 @@ export class RegisterComponent {
 			return;
 		}
 
-		const userData = {
+		const userData: UserData = {
 			name: this.registerForm.value.username,
 			password: this.registerForm.value.password,
 		};
 
-		this.http
-			.post("http://127.0.0.1:5000/api/auth/register", userData)
-			.subscribe({
-				next: (res) => {
-					alert("Registration completed successfully!");
-					this.router.navigate(["/login"]);
-				},
-				error: (err) => {
-					console.error(err);
-					alert("Register error: " + err.error.message);
-				},
-			});
+		this.apiService.register(userData).subscribe({
+			next: (res) => {
+				alert("Registration completed successfully!");
+				this.router.navigate(["/login"]);
+			},
+			error: (err) => {
+				console.error(err);
+				alert("Register error: " + err.error.message);
+			},
+		});
 	}
 }
