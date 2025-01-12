@@ -27,7 +27,7 @@ export class LayoutComponent {
 	}
 
 	protected logout() {
-		this.authService.removeToken();
+		this.authService.logout();
     	this.router.navigate(['/login']);
 	}
 }
