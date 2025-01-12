@@ -1,0 +1,67 @@
+<div mat-dialog-title class="title">Create tournament</div>
+<div mat-dialog-content class="content">
+    <form [formGroup]="createForm">
+        <mat-form-field>
+            <mat-label>Tournament Name</mat-label>
+            <input matInput formControlName="name" />
+            @if (createForm.get('name')?.hasError('required')) {
+                <mat-error>
+                    Name is required.
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" />
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Start date</mat-label>
+            <input matInput formControlName="startDate" [matDatepicker]="startPicker">
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            @if (createForm.get('startDate')?.hasError('required')) {
+                <mat-error>
+                    Start date is required.
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>End date</mat-label>
+            <input matInput formControlName="endDate" [matDatepicker]="endPicker">
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            @if (createForm.get('endDate')?.hasError('required')) {
+                <mat-error>
+                    End date is required.
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Tournament courts</mat-label>
+            <mat-select formControlName="courts" multiple>
+              <mat-select-trigger>
+                {{createForm.get('courts')?.value?.[0]?.track_name || ''}}
+                @if ((createForm.get('courts')?.value.length || 0) > 1) {
+                  <span class="example-additional-selection">
+                    (+{{(createForm.get('courts')?.value?.length || 0) - 1}} {{createForm.get('courts')?.value?.length === 2 ? 'other' : 'others'}})
+                  </span>
+                }
+              </mat-select-trigger>
+              @for (court of courts; track court.id) {
+            <mat-option [value]="court">{{court.track_name}}</mat-option>
+          }
+            </mat-select>
+            @if (createForm.get('courts')?.hasError('noCourts')) {
+                <mat-error>
+                    You need to select at least one court
+                </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions class="footer">
+    <button mat-stroked-button mat-dialog-close color="primary">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="actionDiasabled()" (click)="test()">Create</button>
+</div>

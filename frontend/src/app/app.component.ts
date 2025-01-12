@@ -8,6 +8,7 @@ import { RouterOutlet } from '@angular/router';
     imports: [RouterOutlet],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
+    standalone: true,
     providers: [
         {
             provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,

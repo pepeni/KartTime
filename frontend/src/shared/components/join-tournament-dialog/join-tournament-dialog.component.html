@@ -1,0 +1,22 @@
+<div mat-dialog-title class="title">Join tournament</div>
+<div mat-dialog-content class="content">
+    <form [formGroup]="joinForm">
+        <mat-form-field>
+            <mat-label>Tournament Name</mat-label>
+            <input matInput formControlName="name" />
+            @if (joinForm.get('name')?.hasError('required')) {
+                <mat-error>
+                    Name is required.
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" />
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions class="footer">
+    <button mat-stroked-button mat-dialog-close color="primary">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="actionDiasabled()" (click)="test()">Join</button>
+</div>

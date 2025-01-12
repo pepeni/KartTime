@@ -7,6 +7,7 @@ import { ApiService } from '../../core/services/api.service';
 import { TruckListElement } from '../../core/models/kart-time-defs';
 import { API_TRUCKS_URL } from '../../core/models/const';
 import { FormsModule } from '@angular/forms';
+import { ModalService } from '../../core/services/modal.service';
 
 @Component({
     selector: 'app-courts',
@@ -23,7 +24,11 @@ export class CourtsComponent implements OnInit {
     
     searchValue: string = '';
 
-    constructor(private readonly apiService: ApiService, private cdr: ChangeDetectorRef) {}
+    constructor(
+        private readonly apiService: ApiService, 
+        private readonly cdr: ChangeDetectorRef, 
+        private readonly modalService: ModalService
+    ) {}
 
     ngOnInit(): void {
         this.apiService.get<TruckListElement[]>(API_TRUCKS_URL).subscribe((courts)=>{
@@ -34,7 +39,9 @@ export class CourtsComponent implements OnInit {
 
     public search(): void {
         const filterValue = this.searchValue.toLocaleLowerCase();
-        const filterdCourts = this.courts().filter((track) => track.track_name.toLocaleLowerCase().includes(filterValue))
+        const filterdCourts = this.courts().filter((track) => 
+            track.track_name.toLocaleLowerCase().includes(filterValue) || track.address.toLocaleLowerCase().includes(filterValue)
+        )
         this.filteredCourts.set([...filterdCourts]);
         this.cdr.detectChanges()
     }
@@ -42,5 +49,10 @@ export class CourtsComponent implements OnInit {
     public reset(): void {
         this.searchValue = "";
         this.search()
+    }
+
+    public openModal(): void {
+        this.modalService.openNewGPDialog()
+        // this.modalService.openJoinGPDialog()
     }
 }
