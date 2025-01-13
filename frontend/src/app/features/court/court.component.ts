@@ -76,7 +76,7 @@ export class CourtComponent {
             )
             .subscribe({
                 next: (times) => {
-                    this.bestScores.set(times);
+                    this.bestScores.set(times.slice(0, 8));
                 },
                 error: () => {
                     this.bestScores.set([]);
