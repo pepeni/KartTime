@@ -139,7 +139,8 @@ class UserBestLapTimes(Resource):
             db.session.query(
                 Times.track_id,
                 Track.track_name,
-                db.func.min(Times.lap_time).label("best_lap_time")
+                db.func.min(Times.lap_time).label("best_lap_time"),
+                db.func.min(Times.lap_date).label("lap_date")
             )
             .join(Track, Times.track_id == Track.id)
             .filter(Times.user_id == user_id)
@@ -154,7 +155,8 @@ class UserBestLapTimes(Resource):
             {
                 "track_id": best_time.track_id,
                 "track_name": best_time.track_name,
-                "best_lap_time": f"{best_time.best_lap_time.minute:02}:{best_time.best_lap_time.second:02}.{int(best_time.best_lap_time.microsecond / 1000):03}"
+                "lap_time": f"{best_time.best_lap_time.minute:02}:{best_time.best_lap_time.second:02}.{int(best_time.best_lap_time.microsecond / 1000):03}",
+                "lap_date": best_time.lap_date.strftime('%Y-%m-%d')
             }
             for best_time in best_times
         ], 200
