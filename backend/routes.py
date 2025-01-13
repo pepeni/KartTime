@@ -246,7 +246,13 @@ class TrackLapTimes(Resource):
         if not track:
             return {"message": "Podany tor nie istnieje!"}, 404
 
-        times = db.session.query(Times, User).join(User).filter(Times.track_id == track_id).all()
+        times = (
+            db.session.query(Times, User)
+            .join(User)
+            .filter(Times.track_id == track_id)
+            .order_by(Times.lap_time.asc())
+            .all()
+        )
 
         if not times:
             return {"message": "Brak czasów dla tego toru."}, 404
