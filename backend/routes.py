@@ -313,6 +313,7 @@ class GPParticipants(Resource):
         track = Track.query.get(gp.track_id)
 
         return {
+            "gp_id": gp.id,
             "name": gp.name, 
             "gp_code": gp.gp_code,
             "track_id": gp.track_id,
@@ -376,6 +377,7 @@ class GPTimesList(Resource):
             return {"message": "Brak czasów dla tego GP."}, 404
 
         return [{
+            "id": time.GPTimes.id,
             "user_id": time.GPTimes.user_id,
             "user_name": time.User.name,
             "standing": time.GPTimes.standing,
