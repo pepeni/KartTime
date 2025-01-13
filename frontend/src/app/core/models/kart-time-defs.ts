@@ -43,3 +43,15 @@ export interface Result {
 	lap_time: string;
 	lap_date: string;
 }
+
+export interface JoinGP {
+	user_id: number;
+	gp_code: string;
+};
+
+export interface NewResultGp {
+	user_id: number;
+	gp_id: number;
+	lap_time: string;
+	standing: number;
+}

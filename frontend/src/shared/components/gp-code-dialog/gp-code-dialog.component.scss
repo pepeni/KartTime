@@ -1,0 +1,49 @@
+.dialog-title {
+	font-weight: bold;
+	text-align: center;
+    font-size: 24px;
+    padding-top: 16px;
+}
+
+.dialog-content {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 1rem;
+    width: 250px;
+    padding: 16px 0;
+}
+
+.code-container {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 1.2rem;
+	font-weight: bold;
+}
+
+.gp-code {
+	border: solid 1px rgb(213, 209, 221);
+	padding: 10px;
+}
+
+.mat-icon {
+	transition: color 0.3s ease;
+	color: #757575;
+}
+
+.mat-icon:hover {
+	color: #000;
+}
+
+.dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	padding: 1rem;
+    padding: 16px;
+    border-top: 1px solid #0D92F4;
+}
+
+.mat-icon[fontIcon="check"] {
+	color: #4caf50;
+}

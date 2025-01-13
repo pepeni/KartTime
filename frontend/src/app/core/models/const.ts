@@ -6,3 +6,5 @@ export const API_CREATE_GP_URL = 'gp/create';
 export const API_USER_GP_LIST_URL = (userId: number) => `gp/user/${userId}/gplist`;
 export const API_GP_INFO_PARTICIPANTS_URL = (gpId: number) => `gp/${gpId}/participants`;
 export const API_GP_TIMES_URL = (gpId: number) => `gp/${gpId}/times`;
+export const API_JOIN_GP_URL = 'gp/join';
+export const API_ADD_GP_RESULT_URL = 'gp/add_time';

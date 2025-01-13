@@ -1,0 +1,36 @@
+<div mat-dialog-title class="title">Add result to GP</div>
+<div mat-dialog-content class="content">
+    <form [formGroup]="resultForm">
+        <mat-form-field>
+            <mat-label>Lap time</mat-label>
+            <input matInput formControlName="lap_time" />
+            <mat-hint>Enter time in format MM:SS.SSS</mat-hint>
+            @if (resultForm.get('lap_time')?.hasError('required')) {
+                <mat-error >
+                    Lap time is required.
+                </mat-error>
+            } @else if (resultForm.get('lap_time')?.hasError('pattern')) {
+                <mat-error>
+                    Enter a valid lap time in MM:SS.SSS format.
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Standing</mat-label>
+            <input matInput formControlName="standing"/>
+            @if (resultForm.get('standing')?.hasError('required')) {
+                <mat-error >
+                    Standing is required.
+                </mat-error>
+            } @else if (resultForm.get('standing')?.hasError('pattern')) {
+                <mat-error>
+                    Enter a valid number (max 2 digits).
+                </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions class="footer">
+    <button mat-stroked-button mat-dialog-close color="primary">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="actionDiasabled()" (click)="addResult()">Add</button>
+</div>

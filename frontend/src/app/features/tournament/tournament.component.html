@@ -2,16 +2,33 @@
 
 <div class="actions">
 	<button mat-raised-button color="primary" (click)="onShowGPCodeClick()">Show GP code</button>
-    <button mat-raised-button color="primary" (click)="addNewResult()">Add new result</button>
+    <button mat-raised-button color="primary" (click)="openAddNewResultGPDialog()">Add new result</button>
 </div>
 
-<div class="tournament-sections">
-	<div class="list-wrapper">
+<div class="participants">
+	@for (participant of participants; track participant.id) {
+		<div class="participant"
+			[class.selected]="selectedParticipant === participant.id"
+			(click)="selectParticipant(participant.id)">
+			<mat-icon fontIcon="account_circle"></mat-icon>
+			{{participant.name}}
+		</div>
+	} @empty {
+		<p>There is no participants in GP yet.</p>
+	}
+    
+</div>
+
+<div class="results">
+	<div class="results-list">
 		@for (result of results; track result.id) {
-			<div class="element-container">
-				<div class="element-username">{{result.user_name}}</div>
-				<div class="element-laptime">{{result.lap_time}}</div>
-				<div class="element-lapdate">{{result.lap_date}}</div>
+			<div class="result" [class.selected]="result.user_id === selectedParticipant">
+				<div class="standing">{{result.standing}}</div>
+				<div class="username-laptime">
+					<div class="username">{{result.user_name}}</div>
+					<div class="laptime">{{result.lap_time}}</div>
+				</div>
+				<div class="lapdate">{{result.lap_date}}</div>
 			</div>
 		} @empty {
 			<p>There is not results in GP yet.</p>

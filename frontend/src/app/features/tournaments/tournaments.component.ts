@@ -26,6 +26,7 @@ export class TournamentsComponent {
 
     ngOnInit(): void {
         this.loadTournaments();
+        this.cdr.detectChanges();
     }
 
 	protected loadTournaments(): void {
@@ -43,6 +44,7 @@ export class TournamentsComponent {
             },
             error: (err) => {
                 console.error("Failed to load tournaments:", err);
+                this.cdr.detectChanges();
             },
         });
     }

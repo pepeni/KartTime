@@ -15,11 +15,7 @@
 	.actions {
 		display: flex;
 		justify-content: space-around;
-
         width: 100%;
-        
-		gap: 1rem;
-		margin-bottom: 2rem;
 
 		button {
 			font-size: 0.9rem;
@@ -27,46 +23,95 @@
 		}
 	}
 
-    .list-wrapper {
-        min-width: 400px;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-		align-items: center;
-		height: 100%;
-		width: 90%;
+	.participants {
+		width: 80%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: start;
 
-		&:has(.element-container:hover) {
-			.element-container:not(:hover)  {
-				background-color: #CCECFF;
-			}
-		}
-	
-		.element-container {
-			background-color: #99D9FF;
+        .participant {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &.selected {
+                background-color: #cceeff;
+                border-color: #99ccff;
+            }
+        }
+    }
+
+	.results {
+		width: 100%;
+		max-width: 800px;
+		
+		.results-list {
 			display: grid;
-			grid-template-areas: "username username" "laptime lapdate";
-			grid-template-columns: 1fr auto;
-			grid-template-rows: 1fr auto;
-			width: 100%;
-			padding: 16px;
-			gap: 16px;
-			border-radius: 8px;
-			cursor: pointer;
+        	grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+
+			&:has(.element-container:hover) {
+				.element-container:not(:hover)  {
+					background-color: #CCECFF;
+				}
+			}
+		
+			.result {
+				display: flex;
+				background-color: #99D9FF;
+				justify-content: space-around;
+				width: 100%;
+				padding: 8px;
+				gap: 16px;
+				cursor: pointer;
+		
+				transition: 200ms all;
 	
-			transition: 200ms all;
-		}
-		.element-username {
-			grid-area: username;
-			font-size: 32px;
-		}
-		.element-laptime {
-			grid-area: laptime;
-			font-size: 20px;
-		}
-		.element-lapdate {
-			grid-area: lapdate;
-            font-size: 20px;
+				&.selected {
+					background-color: #0d47a1; 
+					color: white;
+				}
+	
+				.standing {
+					font-size: 60px;
+					font-weight: bold;
+					text-align: center;
+				}
+
+				.username-laptime {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					gap: 4px;
+				}
+	
+				.username {
+					font-size: 32px;
+					font-weight: 500;
+				}
+	
+				.laptime {
+					font-size: 16px;
+					text-align: right;
+				}
+	
+				.lapdate {
+					font-size: 16px;
+					text-align: right;
+					color: #777;
+					display: flex;
+					align-items: end;
+					padding-bottom: 8px;
+				}
+			}
 		}
 	}
 }
