@@ -57,6 +57,8 @@
 			display: grid;
         	grid-template-columns: repeat(2, 1fr);
             gap: 32px;
+			overflow: auto;
+			max-height: 400px;
 
 			&:has(.element-container:hover) {
 				.element-container:not(:hover)  {
@@ -79,9 +81,21 @@
 					background-color: #0d47a1; 
 					color: white;
 				}
+
+				&.gold {
+					background-color: #ffd700;
+				}
+
+				&.silver {
+					background-color: #c0c0c0;
+				}
+
+				&.bronze {
+					background-color: #cd7f32;
+				}
 	
 				.standing {
-					font-size: 60px;
+					font-size: 54px;
 					font-weight: bold;
 					text-align: center;
 				}
@@ -90,11 +104,12 @@
 					display: flex;
 					flex-direction: column;
 					align-items: center;
+					justify-content: center;
 					gap: 4px;
 				}
 	
 				.username {
-					font-size: 32px;
+					font-size: 24px;
 					font-weight: 500;
 				}
 	

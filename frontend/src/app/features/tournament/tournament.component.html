@@ -22,7 +22,11 @@
 <div class="results">
 	<div class="results-list">
 		@for (result of results; track result.id) {
-			<div class="result" [class.selected]="result.user_id === selectedParticipant">
+			<div class="result" 
+				[class.gold]="result.standing === 1 && result.user_id !== selectedParticipant"
+				[class.silver]="result.standing === 2 && result.user_id !== selectedParticipant"
+				[class.bronze]="result.standing === 3 && result.user_id !== selectedParticipant"
+				[class.selected]="result.user_id === selectedParticipant">
 				<div class="standing">{{result.standing}}</div>
 				<div class="username-laptime">
 					<div class="username">{{result.user_name}}</div>

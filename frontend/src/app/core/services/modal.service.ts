@@ -12,15 +12,17 @@ export class ModalService {
 
     constructor(private readonly _dialog: MatDialog) { }
 
-    public openNewGPDialog(): void {
-        this._dialog.open(NewTournamentDialogComponent, {width: '364px', height: '600px'});
+    public openNewGPDialog(): Observable<boolean> {
+        const dialogRef = this._dialog.open(NewTournamentDialogComponent, {width: '364px', height: '600px'});
+        return dialogRef.afterClosed();
     }
 
-    public openJoinGPDialog(): void {
-        this._dialog.open(JoinTournamentDialogComponent, {width: '364px', height: '332px'});
+    public openJoinGPDialog(): Observable<boolean> {
+        const dialogRef = this._dialog.open(JoinTournamentDialogComponent, {width: '364px', height: '332px'});
+        return dialogRef.afterClosed();
     }
 
-    public openAddNewResultGpDialog(gpId: number): Observable<boolean>{
+    public openAddNewResultGpDialog(gpId: number): Observable<boolean> {
         const dialogRef = this._dialog.open(AddNewResultGpDialogComponent, {width: '364px', height: '364px', data: { gpId }});
         return dialogRef.afterClosed();
     }

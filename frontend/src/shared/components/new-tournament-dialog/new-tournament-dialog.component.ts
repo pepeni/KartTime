@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
@@ -44,6 +44,7 @@ export class NewTournamentDialogComponent implements OnInit {
     private fb: FormBuilder = inject(FormBuilder);
     private apiService = inject(ApiService);
     private authService = inject(AuthService);
+    private dialogRef = inject(MatDialogRef<NewTournamentDialogComponent>);
     
     createForm: FormGroup = this.fb.group({
         name: ["", [Validators.required]],
@@ -77,11 +78,10 @@ export class NewTournamentDialogComponent implements OnInit {
             this.apiService.post(API_CREATE_GP_URL, createGpBody).subscribe({
                 next: (response) => {
                     console.log('Tournament created successfully!', response);
-                    alert("Tournament created successfully!");
+                    this.dialogRef.close(true);
                 },
                 error: (err) => {
                     console.error('Failed to create tournament:', err);
-                    alert("Failed to create tournament");
                 },
             });
         }

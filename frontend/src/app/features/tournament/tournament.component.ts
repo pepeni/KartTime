@@ -91,7 +91,11 @@ export class TournamentComponent {
 	}
 
 	protected selectParticipant(participantId: number) {
-		this.selectedParticipant = participantId;
+		if (this.selectedParticipant !== participantId) {
+			this.selectedParticipant = participantId;
+			return;
+		}
+		this.selectedParticipant = null;
 	}
 
 	protected openAddNewResultGPDialog() {
