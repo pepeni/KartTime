@@ -1,0 +1,72 @@
+:host {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 32px;
+	padding-bottom: 32px;
+
+	.title {
+		font-size: 40px;
+		line-height: 48px;
+		margin-top: 32px;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: space-around;
+
+        width: 100%;
+        
+		gap: 1rem;
+		margin-bottom: 2rem;
+
+		button {
+			font-size: 0.9rem;
+			color: white;
+		}
+	}
+
+    .list-wrapper {
+        min-width: 400px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		align-items: center;
+		height: 100%;
+		width: 90%;
+
+		&:has(.element-container:hover) {
+			.element-container:not(:hover)  {
+				background-color: #CCECFF;
+			}
+		}
+	
+		.element-container {
+			background-color: #99D9FF;
+			display: grid;
+			grid-template-areas: "username username" "laptime lapdate";
+			grid-template-columns: 1fr auto;
+			grid-template-rows: 1fr auto;
+			width: 100%;
+			padding: 16px;
+			gap: 16px;
+			border-radius: 8px;
+			cursor: pointer;
+	
+			transition: 200ms all;
+		}
+		.element-username {
+			grid-area: username;
+			font-size: 32px;
+		}
+		.element-laptime {
+			grid-area: laptime;
+			font-size: 20px;
+		}
+		.element-lapdate {
+			grid-area: lapdate;
+            font-size: 20px;
+		}
+	}
+}
