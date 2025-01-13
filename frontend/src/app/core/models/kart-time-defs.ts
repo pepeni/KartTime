@@ -69,3 +69,10 @@ export interface NewResultGp {
 	lap_time: string;
 	standing: number;
 }
+
+export interface BestTime {
+	track_id: number;
+	track_name: string;
+	lap_time: string;
+	lap_date: string;
+}

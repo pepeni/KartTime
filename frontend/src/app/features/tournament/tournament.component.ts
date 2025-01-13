@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, inject } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ApiService } from "../../core/services/api.service";
-import { AuthService } from "../../core/services/auth.service";
 import { Participant, Result, Tournament, TournamentWithParticipants } from "../../core/models/kart-time-defs";
 import { API_GP_INFO_PARTICIPANTS_URL, API_GP_TIMES_URL } from "../../core/models/const";
 import { CommonModule } from "@angular/common";
@@ -22,7 +21,6 @@ export class TournamentComponent {
 	private readonly route = inject(ActivatedRoute);
 	private readonly cdr = inject(ChangeDetectorRef);
 	private readonly apiService = inject(ApiService);
-	private readonly authService = inject(AuthService);
 	private readonly router = inject(Router);
 	private readonly dialog = inject(MatDialog);
 	private readonly modalService = inject(ModalService);

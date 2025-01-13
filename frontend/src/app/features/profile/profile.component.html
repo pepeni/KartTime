@@ -1,1 +1,23 @@
-<div class="title">Welcome, Karmel</div>
+<div class="title">Welcome, {{ userName }}!</div>
+
+<div class="subtitle">
+    <mat-icon fontIcon="star_rate"></mat-icon>
+    Your Best Lap Times
+    <mat-icon fontIcon="star_rate"></mat-icon>
+</div>
+
+<div class="best-score--wrapper">
+    @if (bestTimes.length) {
+        <div class="scores">
+            @for (score of bestTimes; track score.track_id) {
+                <div class="score">
+                    <div class="score--track-name">{{score.track_name}}</div>
+                    <div class="score--time">{{score.lap_time}}</div>
+                    <div class="score--date">{{score.lap_date}}</div>
+                </div>
+            }
+        </div>
+    } @else {
+        No score yet...
+    }
+</div>

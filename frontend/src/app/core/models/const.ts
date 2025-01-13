@@ -10,3 +10,5 @@ export const API_GP_INFO_PARTICIPANTS_URL = (gpId: number) => `gp/${gpId}/partic
 export const API_GP_TIMES_URL = (gpId: number) => `gp/${gpId}/times`;
 export const API_JOIN_GP_URL = 'gp/join';
 export const API_ADD_GP_RESULT_URL = 'gp/add_time';
+export const API_TRACKS_USER_BEST_TIMES = (userId: number) => `tracks/user/${userId}/best-times`;
+export const API_USER_WHOAMI = (userId: number) => `auth/whoami/${userId}`;

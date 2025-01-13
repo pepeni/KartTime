@@ -1,0 +1,105 @@
+:host {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 16px;
+}
+
+.title {
+    font-size: 40px;
+    line-height: 48px;
+    margin-top: 32px;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    margin-top: 16px;
+    margin-bottom: 32px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.best-score--wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .best-score {
+        &--title {
+            font-size: 40px;
+            padding-bottom: 16px;
+        }
+    }
+    .scores {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 16px;
+        height: 520px;
+
+        .score {
+            display: grid;
+            grid-template-areas: 'score_track_name score_track_name' 'score_time score_date';
+            width: 420px;
+            background-color: #FFF7A5;
+            border-radius: 8px;
+            padding: 12px;
+            gap: 8px;
+
+            &--track-name {
+                font-size: 24px;
+                grid-area: score_track_name;
+            }
+            &--time {
+                grid-area: score_time;
+            }
+            &--date {
+                grid-area: score_date;
+            }
+        }
+    }
+}
+
+
+// .list-wrapper {
+//     display: flex;
+//     flex-direction: column;
+//     gap: 16px;
+//     align-items: center;
+//     height: 100%;
+//     overflow: auto;
+
+//     &:has(.element-container:hover) {
+//         .element-container:not(:hover)  {
+//             background-color: #CCECFF;
+//         }
+//     }
+
+//     .element-container {
+//         background-color: #99D9FF;
+//         display: grid;
+//         grid-template-areas: "name time" "address address";
+//         grid-template-columns: 1fr auto;
+//         grid-template-rows: 1fr auto;
+//         padding: 16px;
+//         width: 90%;
+//         gap: 16px;
+//         border-radius: 8px;
+//         cursor: pointer;
+
+//         transition: 200ms all;
+//     }
+//     .element-name {
+//         grid-area: name;
+//         font-size: 32px;
+//     }
+//     .element-address {
+//         grid-area: address;
+//     }
+//     .element-time {
+//         grid-area: time;
+//     }
+// }
