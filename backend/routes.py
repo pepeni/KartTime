@@ -129,6 +129,35 @@ class WhoAmI(Resource):
             return {'message': 'User found', 'name': user.name}
         else:
             return {'message': 'User not found'}, 404
+        
+@tracks_ns.route('/user/<int:user_id>/best-times')
+class UserBestLapTimes(Resource):
+    # @api.doc(security='JWT Auth')
+    # @token_required
+    def get(self, user_id):
+        best_times = (
+            db.session.query(
+                Times.track_id,
+                Track.track_name,
+                db.func.min(Times.lap_time).label("best_lap_time")
+            )
+            .join(Track, Times.track_id == Track.id)
+            .filter(Times.user_id == user_id)
+            .group_by(Times.track_id, Track.track_name)
+            .all()
+        )
+
+        if not best_times:
+            return {"message": "Brak najlepszych czasów dla tego użytkownika."}, 404
+
+        return [
+            {
+                "track_id": best_time.track_id,
+                "track_name": best_time.track_name,
+                "best_lap_time": f"{best_time.best_lap_time.minute:02}:{best_time.best_lap_time.second:02}.{int(best_time.best_lap_time.microsecond / 1000):03}"
+            }
+            for best_time in best_times
+        ], 200
     
 @tracks_ns.route('/')
 class TracksList(Resource):
