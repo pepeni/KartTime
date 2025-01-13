@@ -1,7 +1,9 @@
-import { inject, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NewTournamentDialogComponent } from "../../../shared/components/new-tournament-dialog/new-tournament-dialog.component";
 import { JoinTournamentDialogComponent } from "../../../shared/components/join-tournament-dialog/join-tournament-dialog.component";
+import { AddNewResultGpDialogComponent } from "../../../shared/components/add-new-result-gp-dialog/add-new-result-gp-dialog.component";
+import { Observable } from "rxjs";
 
 @Injectable({
     providedIn: "root",
@@ -10,11 +12,18 @@ export class ModalService {
 
     constructor(private readonly _dialog: MatDialog) { }
 
-    public openNewGPDialog(): void {
-        this._dialog.open(NewTournamentDialogComponent, {width: '364px', height: '600px'})
+    public openNewGPDialog(): Observable<boolean> {
+        const dialogRef = this._dialog.open(NewTournamentDialogComponent, {width: '364px', height: '600px'});
+        return dialogRef.afterClosed();
     }
 
-    public openJoinGPDialog(): void {
-        this._dialog.open(JoinTournamentDialogComponent, {width: '364px', height: '332px'})
+    public openJoinGPDialog(): Observable<boolean> {
+        const dialogRef = this._dialog.open(JoinTournamentDialogComponent, {width: '364px', height: '332px'});
+        return dialogRef.afterClosed();
+    }
+
+    public openAddNewResultGpDialog(gpId: number): Observable<boolean> {
+        const dialogRef = this._dialog.open(AddNewResultGpDialogComponent, {width: '364px', height: '364px', data: { gpId }});
+        return dialogRef.afterClosed();
     }
 }

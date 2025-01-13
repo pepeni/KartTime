@@ -1,0 +1,12 @@
+<div mat-dialog-title class="dialog-title">GP Code</div>
+<div mat-dialog-content class="dialog-content">
+	<div class="code-container">
+		<span class="gp-code">{{ data.gpCode }}</span>
+		<button mat-icon-button (click)="copyCode()">
+			<mat-icon fontIcon="{{ copied ? 'check' : 'content_copy' }}"></mat-icon>
+		</button>
+	</div>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+	<button mat-flat-button color="primary" (click)="close()">Close</button>
+</div>

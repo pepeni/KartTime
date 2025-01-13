@@ -7,6 +7,10 @@ import { API_GP_INFO_PARTICIPANTS_URL, API_GP_TIMES_URL } from "../../core/model
 import { CommonModule } from "@angular/common";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+import { MatDialog } from '@angular/material/dialog';
+import { GpCodeDialogComponent } from "../../../shared/components/gp-code-dialog/gp-code-dialog.component";
+import { ModalService } from "../../core/services/modal.service";
+
 
 @Component({
 	selector: "app-tournament",
@@ -20,6 +24,8 @@ export class TournamentComponent {
 	private readonly apiService = inject(ApiService);
 	private readonly authService = inject(AuthService);
 	private readonly router = inject(Router);
+	private readonly dialog = inject(MatDialog);
+	private readonly modalService = inject(ModalService);
 
 	tournament: Tournament = {
 		gp_id: 0,
@@ -48,7 +54,6 @@ export class TournamentComponent {
 		const apiUrl = API_GP_INFO_PARTICIPANTS_URL(gpId);
 		this.apiService.get<TournamentWithParticipants>(apiUrl).subscribe({
 			next: (data) => {
-				console.log(data);
 				this.tournament = {
 					gp_id: data.gp_id,
 					name: data.name,
@@ -70,23 +75,36 @@ export class TournamentComponent {
 		const apiUrl = API_GP_TIMES_URL(gpId);
 		this.apiService.get<Result[]>(apiUrl).subscribe({
 			next: (results) => {
-				this.results = results;
+				this.results = results.sort((a, b) => a.standing - b.standing);
 				this.cdr.detectChanges();
 			},
 			error: () => {
-				// alert("Failed to load tournament results!");
 				this.cdr.detectChanges();
 			},
 		});
 	}
 
 	protected onShowGPCodeClick() {
-		alert("Open dialog with gp code");
+		this.dialog.open(GpCodeDialogComponent, {
+			data: { gpCode: this.tournament.gp_code }
+		});
 	}
 
-	copyTournamentLink(): void {
-		navigator.clipboard.writeText(window.location.href);
-		alert("Tournament link copied!");
+	protected selectParticipant(participantId: number) {
+		if (this.selectedParticipant !== participantId) {
+			this.selectedParticipant = participantId;
+			return;
+		}
+		this.selectedParticipant = null;
+	}
+
+	protected openAddNewResultGPDialog() {
+		this.modalService.openAddNewResultGpDialog(this.tournament.gp_id).subscribe((resultAdded) => {
+			if (resultAdded) {
+				this.loadTournamentResults(this.tournament.gp_id);
+				this.cdr.detectChanges();
+			}
+		});
 	}
 
 	addNewResult(): void {

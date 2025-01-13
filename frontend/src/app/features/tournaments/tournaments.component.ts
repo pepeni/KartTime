@@ -26,6 +26,7 @@ export class TournamentsComponent {
 
     ngOnInit(): void {
         this.loadTournaments();
+        this.cdr.detectChanges();
     }
 
 	protected loadTournaments(): void {
@@ -43,16 +44,27 @@ export class TournamentsComponent {
             },
             error: (err) => {
                 console.error("Failed to load tournaments:", err);
+                this.cdr.detectChanges();
             },
         });
     }
 
 	protected openNewGPDialog() {
-        this.modalService.openNewGPDialog();
+        this.modalService.openNewGPDialog().subscribe((resultCreatedGP) => {
+			if (resultCreatedGP) {
+				this.loadTournaments();
+				this.cdr.detectChanges();
+			}
+		});
     }
 
 	protected openJoinGPDialog() {
-		this.modalService.openJoinGPDialog();
+        this.modalService.openJoinGPDialog().subscribe((resultJoinedToGP) => {
+			if (resultJoinedToGP) {
+				this.loadTournaments();
+				this.cdr.detectChanges();
+			}
+		});
 	}
 
 	protected goToTournament(gpId: number) {

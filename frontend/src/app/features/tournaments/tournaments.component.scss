@@ -25,13 +25,12 @@
 	}
 
 	.tournament-sections {
-		min-width: 600px;
+		min-width: 800px;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
 		align-items: center;
-		gap: 2rem;
-		overflow: auto;
+		gap: 1rem;
 		
 		.subtitle {
 			font-size: 24px;
@@ -39,12 +38,14 @@
 	}
 
 	.list-wrapper {
+		max-height: 450px;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
 		align-items: center;
 		height: 100%;
 		width: 90%;
+		overflow: auto;
 
 		&:has(.element-container:hover) {
 			.element-container:not(:hover)  {
