@@ -65,8 +65,4 @@ export class ProfileComponent {
 				},
 			});
 	}
-
-	protected hasScore() {
-
-	}
 }
