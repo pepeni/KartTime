@@ -2,17 +2,18 @@
 <div mat-dialog-content class="content">
     <form [formGroup]="joinForm">
         <mat-form-field>
-            <mat-label>Tournament Name</mat-label>
-            <input matInput formControlName="name" />
-            @if (joinForm.get('name')?.hasError('required')) {
+            <mat-label>Code</mat-label>
+            <input matInput formControlName="code" />
+            <mat-hint>Enter 6-character code</mat-hint>
+            @if (joinForm.get('code')?.hasError('required')) {
                 <mat-error>
-                    Name is required.
+                    Code is required.
+                </mat-error>
+            } @else if (joinForm.get('code')?.hasError('minlength') || joinForm.get('code')?.hasError('maxlength')) {
+                <mat-error>
+                    The code must be 6 characters long.
                 </mat-error>
             }
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Password</mat-label>
-            <input matInput formControlName="password" />
         </mat-form-field>
     </form>
 </div>

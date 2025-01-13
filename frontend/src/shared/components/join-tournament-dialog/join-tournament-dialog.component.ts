@@ -11,7 +11,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { ApiService } from '../../../app/core/services/api.service';
-import { TruckListElement } from '../../../app/core/models/kart-time-defs';
+import { TrackListElement } from '../../../app/core/models/kart-time-defs';
 import { API_TRUCKS_URL } from '../../../app/core/models/const';
 
 
@@ -44,8 +44,7 @@ export class JoinTournamentDialogComponent {
     private fb: FormBuilder = inject(FormBuilder)
     
     joinForm: FormGroup = this.fb.group({
-        name: ["", [Validators.required]],
-        password: [""],
+        code: ["", [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
     });
 
     public test(): void {

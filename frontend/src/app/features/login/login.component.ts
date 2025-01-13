@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
-import { Component } from "@angular/core";
+import { ChangeDetectorRef, Component, inject } from "@angular/core";
 import {
 	FormBuilder,
 	FormGroup,
@@ -14,7 +14,7 @@ import { MatInputModule } from "@angular/material/input";
 import { Router } from "@angular/router";
 import { AuthService } from "../../core/services/auth.service";
 import { ApiService } from "../../core/services/api.service";
-import { UserData } from "../../core/models/user-data";
+import { UserData } from "../../core/models/kart-time-defs";
 
 @Component({
 	selector: "app-login",
@@ -31,15 +31,15 @@ import { UserData } from "../../core/models/user-data";
 	styleUrl: "./login.component.scss",
 })
 export class LoginComponent {
+	private readonly cdr = inject(ChangeDetectorRef);
+	private readonly fb = inject(FormBuilder);
+	private readonly apiService = inject(ApiService);
+	private readonly authService = inject(AuthService);
+	private readonly router = inject(Router);
+
 	loginForm: FormGroup;
 
-	constructor(
-		private router: Router,
-		private fb: FormBuilder,
-		private http: HttpClient,
-		private authService: AuthService,
-		private readonly apiService: ApiService
-	) {
+	constructor() {
 		this.loginForm = this.fb.group({
 			username: ["", [Validators.required]],
 			password: ["", [Validators.required]],

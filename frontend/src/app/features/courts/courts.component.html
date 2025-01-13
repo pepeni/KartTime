@@ -13,7 +13,7 @@
 <div class="filtered-elements">
     <div class="list-wrapper">
         @for (court of filteredCourts(); track court.id) {
-            <div class="element-container">
+            <div class="element-container" (click)="goToCourt(court.id)">
                 <div class="element-name">{{court.track_name}}</div>
                 <div class="element-address">{{court.address}}</div>
                 <div class="element-time">{{court.opening_hours}}</div>

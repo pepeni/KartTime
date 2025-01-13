@@ -32,7 +32,7 @@
             </mat-form-field>
             <mat-form-field appearance="fill">
                 <mat-label>Repeat Password</mat-label>
-                <input matInput type="password" formControlName="repeatPassword" (keyup.enter)="onRegisterClick()" />
+                <input matInput type="password" formControlName="repeatPassword" />
                 @if (registerForm.get('repeatPassword')?.hasError('required')) {
                     <mat-error>
                         Repeating the password is required.

@@ -2,7 +2,15 @@
     <div class="header">
         <div class="header-element">
             <div class="icon-element">
-                <button mat-icon-button (click)="selectView('courts')">
+                <button mat-icon-button [routerLink]="['/profile']">
+                    <mat-icon fontIcon="account_circle"></mat-icon>
+                </button>
+                <div class="label">Profile</div>
+            </div>
+        </div>
+        <div class="header-element">
+            <div class="icon-element">
+                <button mat-icon-button [routerLink]="['/courts']">
                     <mat-icon fontIcon="list"></mat-icon>
                 </button>
                 <div class="label">Courts list</div>
@@ -11,7 +19,7 @@
         <div class="header-element">
             <div class="icon-element">
                 <button mat-icon-button>
-                    <mat-icon fontIcon="today" (click)="selectView('tournaments')"></mat-icon>
+                    <mat-icon fontIcon="today" [routerLink]="['/tournaments']"></mat-icon>
                  </button>
                  <div class="label">Tournaments</div>
             </div>
@@ -26,13 +34,6 @@
         </div>
     </div>
     <div class="content">
-        @switch (selectedView) {
-            @case ("courts") {
-                <app-courts></app-courts>
-            }
-            @case ("tournaments") {
-                <app-tournaments></app-tournaments>
-            }
-        }
+        <router-outlet />
     </div>
 </div>

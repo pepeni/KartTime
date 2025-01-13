@@ -3,7 +3,7 @@ import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { AuthService } from "./auth.service";
 import { API_LOGIN_URL, API_REGISTER_URL } from "../models/const";
-import { UserData } from "../models/user-data";
+import { UserData } from "../models/kart-time-defs";
 
 @Injectable({
     providedIn: "root",
@@ -30,18 +30,18 @@ export class ApiService {
     }
 
     post<T>(endpoint: string, body: any): Observable<T> {
-        const headers = this.getAuthHeaders();
-        return this.http.post<T>(`${this.BASE_URL}${endpoint}`, body, { headers });
+        // const headers = this.getAuthHeaders();
+        return this.http.post<T>(`${this.BASE_URL}${endpoint}`, body);
     }
 
     put<T>(endpoint: string, body: any): Observable<T> {
-        const headers = this.getAuthHeaders();
-        return this.http.put<T>(`${this.BASE_URL}${endpoint}`, body, { headers });
+        // const headers = this.getAuthHeaders();
+        return this.http.put<T>(`${this.BASE_URL}${endpoint}`, body);
     }
 
     delete<T>(endpoint: string): Observable<T> {
-        const headers = this.getAuthHeaders();
-        return this.http.delete<T>(`${this.BASE_URL}${endpoint}`, { headers });
+        // const headers = this.getAuthHeaders();
+        return this.http.delete<T>(`${this.BASE_URL}${endpoint}`);
     }
 
     login(body: UserData): Observable<any> {

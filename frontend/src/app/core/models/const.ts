@@ -1,3 +1,6 @@
-export const API_TRUCKS_URL = 'tracks';
 export const API_LOGIN_URL = 'auth/login';
-export const API_REGISTER_URL = 'auth/login';
+export const API_REGISTER_URL = 'auth/register';
+
+export const API_TRUCKS_URL = 'tracks';
+export const API_CREATE_GP_URL = 'gp/create';
+export const API_USER_GP_LIST_URL = (userId: number) => `gp/user/${userId}/gplist`;

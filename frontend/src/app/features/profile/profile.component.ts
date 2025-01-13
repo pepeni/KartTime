@@ -2,19 +2,18 @@ import { ChangeDetectorRef, Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
 @Component({
-	selector: "app-tournament",
+	selector: "app-profile",
 	imports: [],
-	templateUrl: "./tournament.component.html",
-	styleUrl: "./tournament.component.scss",
+	templateUrl: "./profile.component.html",
+	styleUrl: "./profile.component.scss",
 })
-export class TournamentComponent {
+export class ProfileComponent {
 	private readonly route = inject(ActivatedRoute);
 	private readonly cdr = inject(ChangeDetectorRef);
 
-	gpId!: number;
+	courtId!: number;
 
 	ngOnInit(): void {
-		this.gpId = Number(this.route.snapshot.paramMap.get("gpId"));
 		this.cdr.detectChanges();
 	}
 }

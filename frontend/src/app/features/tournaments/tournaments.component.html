@@ -9,11 +9,16 @@
 </div>
 
 <div class="tournament-sections">
-	<div class="section">
-		<div class="subtitle">Opened Tournaments</div>
-	</div>
-    
-	<div class="section">
-		<div class="subtitle">My Tournaments</div>
+	<div class="subtitle">My Tournaments</div>
+	<div class="list-wrapper">
+		@for (tournament of tournaments; track tournament.gp_id) {
+			<div class="element-container" (click)="goToTournament(tournament.gp_id)">
+				<div class="element-name">{{tournament.name}}</div>
+				<div class="element-trackname">Track: {{tournament.track_name}}</div>
+				<div class="element-code">Code: {{tournament.gp_code}}</div>
+			</div>
+		} @empty {
+			<p>You are not participating in any tournaments yet.</p>
+		}
 	</div>
 </div>

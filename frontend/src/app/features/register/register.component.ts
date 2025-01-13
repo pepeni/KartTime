@@ -1,13 +1,13 @@
 import { CommonModule } from "@angular/common";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
-import { Component } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { Router } from "@angular/router";
 import { ApiService } from "../../core/services/api.service";
-import { UserData } from "../../core/models/user-data";
+import { UserData } from "../../core/models/kart-time-defs";
 
 
 const passwordValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -25,23 +25,27 @@ const passwordValidator: ValidatorFn = (control: AbstractControl): ValidationErr
 
 @Component({
 	selector: "app-register",
-	imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, HttpClientModule],
+	imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
 	templateUrl: "./register.component.html",
 	styleUrl: "./register.component.scss",
 })
 export class RegisterComponent {
+	private readonly cdr = inject(ChangeDetectorRef);
+	private readonly fb = inject(FormBuilder);
+	private readonly apiService = inject(ApiService);
+	private readonly router = inject(Router);
+
 	registerForm: FormGroup;
 
-	constructor(
-		private router: Router,
-		private fb: FormBuilder,
-		private http: HttpClient,
-		private readonly apiService: ApiService
-	) {
+	constructor() {
 		this.registerForm = this.fb.group({
 			username: ["", [Validators.required, Validators.minLength(3)]],
 			password: ["", [Validators.required, passwordValidator]],
 			repeatPassword: ["", [Validators.required]],
+		});
+
+		this.registerForm.valueChanges.subscribe(() => {
+			this.cdr.detectChanges();
 		});
 	}
 
@@ -69,10 +73,12 @@ export class RegisterComponent {
 			next: (res) => {
 				alert("Registration completed successfully!");
 				this.router.navigate(["/login"]);
+				this.cdr.detectChanges();
 			},
 			error: (err) => {
 				console.error(err);
 				alert("Register error: " + err.error.message);
+				this.cdr.detectChanges();
 			},
 		});
 	}
