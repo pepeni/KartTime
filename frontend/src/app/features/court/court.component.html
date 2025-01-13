@@ -1,1 +1,36 @@
-<p>court works!</p>
+@if (truck(); as trk) {
+    <div class="title">{{trk.track_name}}</div>
+    <div class="wrapper">
+        <div class="address">Address: {{trk.address}}</div>
+        <div class="time">Open at: {{trk.opening_hours}}</div>
+        <a class="link" [attr.href]="trk.url" target="_blank">
+            <mat-icon>navigate_next</mat-icon>Go on court site
+        </a>
+        <div class="new-time">
+            <mat-form-field>
+                <mat-label>Your time</mat-label>
+                <input matInput type="text" (keyup.enter)="addTime()" placeholder="MM:SS.sss" [(ngModel)]="newTime" ngDefaultControl/>
+            </mat-form-field>
+            <button mat-flat-button color="primary" (click)="addTime()">Add time</button>
+        </div>
+        <div class="best-score--wrapper">
+            <div class="best-score--title">Best scores</div>
+            @if (hasScore();) {
+                <div class="scores">
+                    @for (score of bestScores(); track score.id; let idx = $index) {
+                        <div class="score">
+                            <div class="score--number">{{idx + 1}}</div>
+                            <div class="score--user">{{score.user_name}}</div>
+                            <div class="score--time">{{score.lap_time}}</div>
+                            <div class="score--date">{{score.lap_date}}</div>
+                        </div>
+                    }
+                </div>
+            } @else {
+                No score yet...
+            }
+        </div>
+    </div>
+} @else {
+    Fetching...
+}

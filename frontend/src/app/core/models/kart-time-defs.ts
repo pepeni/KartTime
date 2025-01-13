@@ -7,6 +7,20 @@ export interface TrackListElement {
 	url: string;
 }
 
+export interface LapTimeRequest {
+	user_id: number;
+	track_id: number;
+	lap_time: string;
+}
+
+export interface LapTimeResponse {
+	id: number;
+	lap_date: string;
+	lap_time: string;
+	user_id: number;
+	user_name: string;
+}
+
 export interface UserData {
 	name: string;
 	password: string;
