@@ -382,6 +382,24 @@ class GPTimesList(Resource):
             "lap_time": f"{time.GPTimes.lap_time.minute:02}:{time.GPTimes.lap_time.second:02}.{int(time.GPTimes.lap_time.microsecond / 1000):03}",
             "lap_date": time.GPTimes.lap_date.strftime('%Y-%m-%d')
         } for time in times], 200
+    
+@gp_ns.route('/user/<int:user_id>/gplist')
+class UserGPList(Resource):
+    # @api.doc(security='JWT Auth')
+    # @token_required
+    def get(self, user_id):
+        gps = db.session.query(GP).join(UserGP).filter(UserGP.user_id == user_id).all()
+
+        if not gps:
+            return {"message": "Brak Grand Prix dla tego użytkownika."}, 404
+
+        return [{
+            "gp_id": gp.id,
+            "name": gp.name,
+            "gp_code": gp.gp_code,
+            "track_id": gp.track_id,
+            "track_name": gp.tracks.track_name
+        } for gp in gps], 200
 
 
 
