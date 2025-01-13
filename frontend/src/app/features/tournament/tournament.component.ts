@@ -75,7 +75,7 @@ export class TournamentComponent {
 		const apiUrl = API_GP_TIMES_URL(gpId);
 		this.apiService.get<Result[]>(apiUrl).subscribe({
 			next: (results) => {
-				this.results = results.sort((a, b) => a.standing - b.standing);
+				this.results = results.sort((a, b) => a.standing - b.standing).slice(0, 6);
 				this.cdr.detectChanges();
 			},
 			error: () => {
